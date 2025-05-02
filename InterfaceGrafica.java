@@ -17,6 +17,7 @@ public class InterfaceGrafica extends JFrame {
     private JPanel statsPanel;
     private JPanel controlPanel;
     private JPanel predioPanel;
+    private JScrollPane predioScrollPane;
     private Color[] cores = {
             new Color(65, 105, 225),   // Royal Blue
             new Color(220, 20, 60),    // Crimson
@@ -76,6 +77,12 @@ public class InterfaceGrafica extends JFrame {
         predioPanel.setBackground(new Color(240, 240, 240));
         predioPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
+        // Adicionar o predioPanel a um JScrollPane
+        predioScrollPane = new JScrollPane(predioPanel);
+        predioScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        predioScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        predioScrollPane.setBorder(BorderFactory.createEmptyBorder());
+
         // Painel de estatísticas com melhor aparência
         statsPanel = new JPanel();
         statsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 5));
@@ -102,7 +109,7 @@ public class InterfaceGrafica extends JFrame {
         JPanel westPanel = new JPanel(new BorderLayout());
         westPanel.setPreferredSize(new Dimension(700, 600));
         westPanel.add(statsPanel, BorderLayout.NORTH);
-        westPanel.add(predioPanel, BorderLayout.CENTER);
+        westPanel.add(predioScrollPane, BorderLayout.CENTER);
         westPanel.add(controlPanel, BorderLayout.SOUTH);
 
         simulationPanel.add(westPanel, BorderLayout.CENTER);
@@ -367,6 +374,23 @@ public class InterfaceGrafica extends JFrame {
         // Configurar o slider com o valor inicial
         velocidadeSlider.setValue(velocidade);
 
+        // Ajustar o tamanho preferido do predioPanel com base no número de andares e elevadores
+        int minAndarHeight = 50;
+        int minElevadorWidth = 60;
+        int espacoEntreElevadores = 10;
+        int margemEsquerda = 80;
+        int margemSuperior = 30;
+        int margemDireita = 80;
+        int margemInferior = 30;
+
+        int panelWidth = margemEsquerda + (elevadores * (minElevadorWidth + espacoEntreElevadores)) + margemDireita;
+        int panelHeight = margemSuperior + (andares * minAndarHeight) + margemInferior;
+        predioPanel.setPreferredSize(new Dimension(panelWidth, panelHeight));
+
+        // Forçar o JScrollPane a revalidar para exibir barras de rolagem, se necessário
+        predioScrollPane.revalidate();
+        predioScrollPane.repaint();
+
         GerenciadorSimulacao gerenciador = new GerenciadorSimulacao();
         List<Pessoa> pessoas = gerenciador.gerarListaPessoas(quantidadePessoas, andares, null);
         for (Pessoa pessoa : pessoas) {
@@ -388,16 +412,24 @@ public class InterfaceGrafica extends JFrame {
         int quantidadeAndares = predio.getAndares().tamanho();
         int quantidadeElevadores = predio.getCentral().getElevadores().tamanho();
 
-        // Calculando dimensões
-        int larguraPredio = predioPanel.getWidth() - 160;
-        int alturaPredio = predioPanel.getHeight() - 60;
-        int andarHeight = Math.max(50, alturaPredio / quantidadeAndares);
-        int elevadorWidth = Math.min(60, (larguraPredio - 40) / quantidadeElevadores);
+        // Dimensões mínimas fixas
+        int andarHeight = 50;
+        int elevadorWidth = 60;
         int espacoEntreElevadores = 10;
 
         int margemEsquerda = 80;
         int margemSuperior = 30;
-        int yBase = predioPanel.getHeight() - margemSuperior;
+        int margemDireita = 80;
+        int margemInferior = 30;
+
+        // Calculando dimensões totais do desenho
+        int larguraPredio = margemEsquerda + (quantidadeElevadores * (elevadorWidth + espacoEntreElevadores)) + margemDireita - espacoEntreElevadores;
+        int alturaPredio = margemSuperior + (quantidadeAndares * andarHeight) + margemInferior;
+
+        // Ajustar o tamanho do painel, se necessário
+        predioPanel.setPreferredSize(new Dimension(larguraPredio, alturaPredio));
+
+        int yBase = alturaPredio - margemInferior;
 
         // Desenhando os andares
         Ponteiro p = predio.getAndares().getInicio();
@@ -405,11 +437,9 @@ public class InterfaceGrafica extends JFrame {
 
         // Desenha um fundo do prédio
         g2d.setColor(new Color(245, 245, 245));
-        g2d.fillRect(margemEsquerda - 10, margemSuperior - 10,
-                larguraPredio + 20, alturaPredio + 20);
+        g2d.fillRect(0, 0, larguraPredio, alturaPredio);
         g2d.setColor(new Color(100, 100, 100));
-        g2d.drawRect(margemEsquerda - 10, margemSuperior - 10,
-                larguraPredio + 20, alturaPredio + 20);
+        g2d.drawRect(0, 0, larguraPredio - 1, alturaPredio - 1);
 
         // Loop pelos andares
         while (p != null && p.isValido()) {
@@ -418,14 +448,14 @@ public class InterfaceGrafica extends JFrame {
 
             // Desenho do andar
             g2d.setColor(new Color(220, 220, 220));
-            g2d.fillRect(margemEsquerda, y - andarHeight, larguraPredio, andarHeight);
+            g2d.fillRect(margemEsquerda, y - andarHeight, larguraPredio - margemEsquerda - margemDireita, andarHeight);
             g2d.setColor(new Color(150, 150, 150));
-            g2d.drawRect(margemEsquerda, y - andarHeight, larguraPredio, andarHeight);
+            g2d.drawRect(margemEsquerda, y - andarHeight, larguraPredio - margemEsquerda - margemDireita, andarHeight);
 
             // Linha divisória entre andares
             if (andarIndex > 0) {
                 g2d.setColor(new Color(120, 120, 120));
-                g2d.drawLine(margemEsquerda, y, margemEsquerda + larguraPredio, y);
+                g2d.drawLine(margemEsquerda, y, larguraPredio - margemDireita, y);
             }
 
             // Texto do andar
@@ -457,7 +487,7 @@ public class InterfaceGrafica extends JFrame {
 
             // Status do painel
             PainelElevador painel = andar.getPainel();
-            int xPainel = margemEsquerda + larguraPredio - 120;
+            int xPainel = larguraPredio - margemDireita - 120;
             int yPainel = y - andarHeight / 2;
 
             g2d.setColor(new Color(100, 100, 100));
@@ -491,7 +521,7 @@ public class InterfaceGrafica extends JFrame {
         int elevadorIndex = 0;
         while (pElevadores != null && pElevadores.isValido()) {
             Elevador elevador = (Elevador) pElevadores.getElemento();
-            int x = margemEsquerda + 50 + (elevadorIndex * (elevadorWidth + espacoEntreElevadores));
+            int x = margemEsquerda + (elevadorIndex * (elevadorWidth + espacoEntreElevadores));
             int elevadorY = yBase - (elevador.getAndarAtual() * andarHeight) - andarHeight;
 
             // Cor do elevador baseado no ID (índice de cores cíclico)
@@ -546,13 +576,14 @@ public class InterfaceGrafica extends JFrame {
         atualizarListaPessoas();
         atualizarEstatisticas();
         predioPanel.repaint();
+        predioScrollPane.revalidate();
     }
 
     private void atualizarListaPessoas() {
         StringBuilder sb = new StringBuilder();
         sb.append("Lista de Pessoas:\n");
         sb.append("┌──────┬─────────────────────┬───────────┐\n");
-        sb.append("│  ID  │    Posição Atual    │  Destino  │\n");
+        sb.append("│  ID     Posição Atual    Destino   │\n");
         sb.append("├──────┼─────────────────────┼───────────┤\n");
 
         Ponteiro pAndares = predio.getAndares().getInicio();
@@ -561,7 +592,7 @@ public class InterfaceGrafica extends JFrame {
             Ponteiro pPessoas = andar.getPessoasAguardando().getPonteiroInicio();
             while (pPessoas != null && pPessoas.isValido()) {
                 Pessoa pessoa = (Pessoa) pPessoas.getElemento();
-                sb.append(String.format("│ P%-3d │ Andar %-2d %-9s │ Andar %-3d │\n",
+                sb.append(String.format(" P%-3d  Andar %-2d %-9s  Andar %-3d \n",
                         pessoa.getId(),
                         andar.getNumero(),
                         pessoa.isPrioritaria() ? "(PRIOR.)" : "(Aguard.)",
@@ -577,7 +608,7 @@ public class InterfaceGrafica extends JFrame {
             Ponteiro pPessoas = elevador.getPessoasNoElevador().getPonteiroInicio();
             while (pPessoas != null && pPessoas.isValido()) {
                 Pessoa pessoa = (Pessoa) pPessoas.getElemento();
-                sb.append(String.format("│ P%-3d │ Elevador %-1d (A%-2d)   │ Andar %-3d │\n",
+                sb.append(String.format("  P%-3d   Elevador %-1d (A%-2d)     Andar %-3d  \n",
                         pessoa.getId(),
                         elevador.getId(),
                         elevador.getAndarAtual(),
@@ -587,7 +618,7 @@ public class InterfaceGrafica extends JFrame {
             pElevadores = pElevadores.getProximo();
         }
 
-        sb.append("└──────┴─────────────────────┴───────────┘\n");
+
         pessoasTextArea.setText(sb.toString());
     }
 
