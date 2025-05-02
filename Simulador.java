@@ -10,10 +10,10 @@ public class Simulador implements Serializable {
     private Predio predio;
     private Estatisticas estatisticas;
 
-    public Simulador(int andares, int elevadores, int velocidadeEmMs, int capacidadeMaxima, int tempoViagemPorAndar, int heuristica, TipoPainel tipoPainel) {
+    public Simulador(int andares, int elevadores, int velocidadeEmMs, int capacidadeMaxima, int tempoViagemPorAndarPico, int tempoViagemPorAndarForaPico, int heuristica, TipoPainel tipoPainel) {
         this.minutoSimulado = 0;
         this.velocidadeEmMs = velocidadeEmMs;
-        this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndar, heuristica, tipoPainel, this); // Passa this
+        this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndarPico, tempoViagemPorAndarForaPico, heuristica, tipoPainel, this);
         this.estatisticas = new Estatisticas();
     }
 
@@ -84,5 +84,10 @@ public class Simulador implements Serializable {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public boolean isHorarioPico() {
+        int horaSimulada = minutoSimulado / 60; // Converte minutos em horas
+        return (horaSimulada >= 8 && horaSimulada < 10) || (horaSimulada >= 17 && horaSimulada < 19);
     }
 }

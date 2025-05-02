@@ -10,15 +10,18 @@ public class Elevador extends EntidadeSimulavel {
     private Predio predio;
     private int heuristica;
     private int minutosRestantesParaMover;
+    private int tempoViagemPorAndarPico;
+    private int tempoViagemPorAndarForaPico;
 
-    public Elevador(int id, int capacidadeMaxima, int tempoViagemPorAndar, Predio predio, int heuristica) {
+    public Elevador(int id, int capacidadeMaxima, int tempoViagemPorAndarPico, int tempoViagemPorAndarForaPico, Predio predio, int heuristica) {
         this.id = id;
         this.andarAtual = 0;
         this.capacidadeMaxima = capacidadeMaxima;
         this.pessoasNoElevador = new Fila();
         this.subindo = true;
         this.destinos = new Lista();
-        this.tempoViagemPorAndar = tempoViagemPorAndar;
+        this.tempoViagemPorAndarPico = tempoViagemPorAndarPico;
+        this.tempoViagemPorAndarForaPico = tempoViagemPorAndarForaPico;
         this.emMovimento = false;
         this.predio = predio;
         this.heuristica = heuristica;
@@ -161,12 +164,14 @@ public class Elevador extends EntidadeSimulavel {
 
     @Override
     public void atualizar(int minutoSimulado) {
-        Simulador simulador = ((Predio) predio).getCentral().getSimulador(); // Ajustar para acessar Simulador
+        Simulador simulador = ((Predio) predio).getCentral().getSimulador();
+        int tempoViagemPorAndar = simulador.isHorarioPico() ? tempoViagemPorAndarPico : tempoViagemPorAndarForaPico;
+
         if (destinos.contem(andarAtual)) {
-            simulador.getEstatisticas().registrarEnergia(0.5); // Energia por parada
+            simulador.getEstatisticas().registrarEnergia(0.5);
         }
         if (emMovimento && minutosRestantesParaMover == 0 && destinos.getInicio() != null) {
-            simulador.getEstatisticas().registrarEnergia(1.0); // Energia por andar percorrido
+            simulador.getEstatisticas().registrarEnergia(1.0);
         }
         if (emMovimento && minutosRestantesParaMover > 0) {
             minutosRestantesParaMover--;

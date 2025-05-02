@@ -15,7 +15,7 @@ public class Main implements Serializable {
                 System.out.println("\n=== Testando " + heuristicaNomes[i] + " com " + painelNomes[j] + " ===");
 
                 // Criar e configurar o simulador
-                Simulador sim = new Simulador(5, 2, 1000, 8, 1, heuristica, tipoPainel);
+                Simulador sim = new Simulador(5, 2, 1000, 8, 2, 1, heuristica, tipoPainel); // 2 minutos em pico, 1 minuto fora de pico
                 Predio predio = sim.getPredio();
                 System.out.println("Simulador criado com " + predio.getAndares().tamanho() + " andares, " +
                         predio.getCentral().getElevadores().tamanho() + " elevadores e painel " + painelNomes[j] + ".");
