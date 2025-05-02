@@ -118,35 +118,40 @@ public class Elevador extends EntidadeSimulavel {
         Andar andar = getAndar(andarAtual);
         Fila pessoasAguardando = andar.getPessoasAguardando();
         Fila temp = new Fila();
+        Simulador simulador = ((Predio) predio).getCentral().getSimulador();
 
-        // Primeiro, embarca pessoas prioritárias
         while (!pessoasAguardando.isVazia() && pessoasNoElevador.tamanho() < capacidadeMaxima) {
             Pessoa pessoa = (Pessoa) pessoasAguardando.desenfileirar();
             if (pessoa.isPrioritaria()) {
                 pessoa.entrarElevador();
                 pessoasNoElevador.enfileirar(pessoa);
                 destinos.inserirFim(pessoa.getAndarDestino());
+                int tempoEspera = simulador.getMinutoSimulado() - pessoa.getMinutoChegada();
+                simulador.getEstatisticas().registrarEspera(tempoEspera);
+                simulador.getEstatisticas().registrarChamadaAtendida();
+                simulador.getEstatisticas().registrarPessoaTransportada();
                 System.out.println("Pessoa " + pessoa.getId() + " (prioritária) embarcou no andar " + andarAtual);
             } else {
                 temp.enfileirar(pessoa);
             }
         }
 
-        // Depois, embarca pessoas não prioritárias
         while (!temp.isVazia() && pessoasNoElevador.tamanho() < capacidadeMaxima) {
             Pessoa pessoa = (Pessoa) temp.desenfileirar();
             pessoa.entrarElevador();
             pessoasNoElevador.enfileirar(pessoa);
             destinos.inserirFim(pessoa.getAndarDestino());
+            int tempoEspera = simulador.getMinutoSimulado() - pessoa.getMinutoChegada();
+            simulador.getEstatisticas().registrarEspera(tempoEspera);
+            simulador.getEstatisticas().registrarChamadaAtendida();
+            simulador.getEstatisticas().registrarPessoaTransportada();
             System.out.println("Pessoa " + pessoa.getId() + " embarcou no andar " + andarAtual);
         }
 
-        // Restaura pessoas que não embarcaram
         while (!temp.isVazia()) {
             pessoasAguardando.enfileirar(temp.desenfileirar());
         }
 
-        // Reseta o painel após atender chamadas
         PainelElevador painel = andar.getPainel();
         if (pessoasAguardando.isVazia() &&
                 (painel.getTipoPainel() != TipoPainel.PAINEL_NUMERICO || painel.getAndaresDestino().isVazia())) {
@@ -156,6 +161,13 @@ public class Elevador extends EntidadeSimulavel {
 
     @Override
     public void atualizar(int minutoSimulado) {
+        Simulador simulador = ((Predio) predio).getCentral().getSimulador(); // Ajustar para acessar Simulador
+        if (destinos.contem(andarAtual)) {
+            simulador.getEstatisticas().registrarEnergia(0.5); // Energia por parada
+        }
+        if (emMovimento && minutosRestantesParaMover == 0 && destinos.getInicio() != null) {
+            simulador.getEstatisticas().registrarEnergia(1.0); // Energia por andar percorrido
+        }
         if (emMovimento && minutosRestantesParaMover > 0) {
             minutosRestantesParaMover--;
             return;

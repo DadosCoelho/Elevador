@@ -8,15 +8,25 @@ public class Simulador implements Serializable {
     private transient Timer timer;
     private boolean emExecucao;
     private Predio predio;
+    private Estatisticas estatisticas;
 
     public Simulador(int andares, int elevadores, int velocidadeEmMs, int capacidadeMaxima, int tempoViagemPorAndar, int heuristica, TipoPainel tipoPainel) {
         this.minutoSimulado = 0;
         this.velocidadeEmMs = velocidadeEmMs;
-        this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndar, heuristica, tipoPainel);
+        this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndar, heuristica, tipoPainel, this); // Passa this
+        this.estatisticas = new Estatisticas();
+    }
+
+    public Estatisticas getEstatisticas() {
+        return estatisticas;
     }
 
     public Predio getPredio() {
         return predio;
+    }
+
+    public int getMinutoSimulado() { // Novo método
+        return minutoSimulado;
     }
 
     public void iniciar() {

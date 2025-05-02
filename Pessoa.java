@@ -6,13 +6,19 @@ public class Pessoa implements Serializable {
     private int andarDestino;
     private boolean dentroElevador;
     private boolean prioritaria; // Cadeirante ou idoso
+    private int minutoChegada;
 
-    public Pessoa(int id, int origem, int destino, boolean prioritaria) {
+    public Pessoa(int id, int origem, int destino, boolean prioritaria, int minutoChegada) {
         this.id = id;
         this.andarOrigem = origem;
         this.andarDestino = destino;
         this.dentroElevador = false;
         this.prioritaria = prioritaria;
+        this.minutoChegada = minutoChegada;
+    }
+
+    public int getMinutoChegada() {
+        return minutoChegada;
     }
 
     public int getId() {

@@ -31,10 +31,10 @@ public class Main implements Serializable {
                 }
 
                 // Criar pessoas (normais e prioritárias)
-                Pessoa p1 = new Pessoa(1, 0, 3, false); // Normal, de andar 0 para 3
-                Pessoa p2 = new Pessoa(2, 0, 2, true);  // Prioritária, de andar 0 para 2
-                Pessoa p3 = new Pessoa(3, 2, 4, false); // Normal, de andar 2 para 4
-                Pessoa p4 = new Pessoa(4, 4, 1, true);  // Prioritária, de andar 4 para 1
+                Pessoa p1 = new Pessoa(1, 0, 3, false, sim.getMinutoSimulado());
+                Pessoa p2 = new Pessoa(2, 0, 2, true, sim.getMinutoSimulado());
+                Pessoa p3 = new Pessoa(3, 2, 4, false, sim.getMinutoSimulado());
+                Pessoa p4 = new Pessoa(4, 4, 1, true, sim.getMinutoSimulado());
 
                 // Adicionar pessoas aos andares
                 andar0.adicionarPessoa(p1);
@@ -78,6 +78,12 @@ public class Main implements Serializable {
                     Thread.sleep(3000); // Simular por mais 3 segundos
                     sim.encerrar();
                     System.out.println("Simulação encerrada.");
+                    Estatisticas stats = sim.getEstatisticas();
+                    System.out.println("\nEstatísticas da Simulação:");
+                    System.out.println("Tempo médio de espera: " + stats.getTempoMedioEspera() + " minutos");
+                    System.out.println("Chamadas atendidas: " + stats.getChamadasAtendidas());
+                    System.out.println("Energia consumida: " + stats.getEnergiaConsumida() + " unidades");
+                    System.out.println("Pessoas transportadas: " + stats.getTotalPessoasTransportadas());
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
