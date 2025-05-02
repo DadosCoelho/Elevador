@@ -85,6 +85,10 @@ public class Simulador implements Serializable {
         }, 0, velocidadeEmMs);
     }
 
+    public void setVelocidadeEmMsInterno(int novaVelocidade) {
+        this.velocidadeEmMs = novaVelocidade;
+    }
+
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
     }
