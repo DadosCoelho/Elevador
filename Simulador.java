@@ -9,10 +9,14 @@ public class Simulador implements Serializable {
     private boolean emExecucao;
     private Predio predio;
 
-    public Simulador(int andares, int elevadores, int velocidadeEmMs) {
+    public Simulador(int andares, int elevadores, int velocidadeEmMs, int capacidadeMaxima, int tempoViagemPorAndar) {
         this.minutoSimulado = 0;
         this.velocidadeEmMs = velocidadeEmMs;
-        this.predio = new Predio(andares, elevadores);
+        this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndar);
+    }
+
+    public Predio getPredio() {
+        return predio;
     }
 
     public void iniciar() {
@@ -65,11 +69,12 @@ public class Simulador implements Serializable {
     public static Simulador carregar(String nomeArquivo) {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(nomeArquivo))) {
             Simulador sim = (Simulador) in.readObject();
-            sim.continuar();
             return sim;
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             return null;
         }
     }
+
+
 }

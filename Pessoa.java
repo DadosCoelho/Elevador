@@ -5,12 +5,14 @@ public class Pessoa implements Serializable {
     private int andarOrigem;
     private int andarDestino;
     private boolean dentroElevador;
+    private boolean prioritaria; // Cadeirante ou idoso
 
-    public Pessoa(int id, int origem, int destino) {
+    public Pessoa(int id, int origem, int destino, boolean prioritaria) {
         this.id = id;
         this.andarOrigem = origem;
         this.andarDestino = destino;
         this.dentroElevador = false;
+        this.prioritaria = prioritaria;
     }
 
     public int getId() {
@@ -35,5 +37,9 @@ public class Pessoa implements Serializable {
 
     public void sairElevador() {
         this.dentroElevador = false;
+    }
+
+    public boolean isPrioritaria() {
+        return prioritaria;
     }
 }
