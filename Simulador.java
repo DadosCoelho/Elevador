@@ -9,10 +9,10 @@ public class Simulador implements Serializable {
     private boolean emExecucao;
     private Predio predio;
 
-    public Simulador(int andares, int elevadores, int velocidadeEmMs, int capacidadeMaxima, int tempoViagemPorAndar) {
+    public Simulador(int andares, int elevadores, int velocidadeEmMs, int capacidadeMaxima, int tempoViagemPorAndar, int heuristica) {
         this.minutoSimulado = 0;
         this.velocidadeEmMs = velocidadeEmMs;
-        this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndar);
+        this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndar, heuristica);
     }
 
     public Predio getPredio() {

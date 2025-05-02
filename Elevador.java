@@ -25,7 +25,22 @@ public class Elevador extends EntidadeSimulavel {
     }
 
     private void escolherProximoDestino() {
-        if (heuristica == 2) { // Otimização de tempo
+        if (heuristica == 1) { // Modelo 1: Sem heurística, ordem de chegada
+            if (!destinos.isVazia()) {
+                return; // Já tem destinos na lista, mantidos em ordem de chegada
+            }
+            Ponteiro p = predio.getAndares().getInicio();
+            while (p != null && p.isValido()) {
+                Andar andar = (Andar) p.getElemento();
+                if ((andar.getPainel().isBotaoSubirAtivado() && subindo) ||
+                        (andar.getPainel().isBotaoDescerAtivado() && !subindo) ||
+                        !andar.getPessoasAguardando().isVazia()) {
+                    destinos.inserirFim(andar.getNumero());
+                    break; // Atende a primeira chamada encontrada
+                }
+                p = p.getProximo();
+            }
+        } else if (heuristica == 2) { // Modelo 2: Otimização de tempo
             int maiorFila = 0;
             int andarEscolhido = -1;
             Ponteiro p = predio.getAndares().getInicio();
@@ -41,8 +56,27 @@ public class Elevador extends EntidadeSimulavel {
             if (andarEscolhido != -1) {
                 destinos.inserirFim(andarEscolhido);
             }
+        } else if (heuristica == 3) { // Modelo 3: Otimização de energia
+            int destinoMaisProximo = -1;
+            int menorDistancia = Integer.MAX_VALUE;
+            Ponteiro p = predio.getAndares().getInicio();
+            while (p != null && p.isValido()) {
+                Andar andar = (Andar) p.getElemento();
+                if (!andar.getPessoasAguardando().isVazia() ||
+                        andar.getPainel().isBotaoSubirAtivado() ||
+                        andar.getPainel().isBotaoDescerAtivado()) {
+                    int distancia = Math.abs(andar.getNumero() - andarAtual);
+                    if (distancia < menorDistancia && (subindo ? andar.getNumero() >= andarAtual : andar.getNumero() <= andarAtual)) {
+                        menorDistancia = distancia;
+                        destinoMaisProximo = andar.getNumero();
+                    }
+                }
+                p = p.getProximo();
+            }
+            if (destinoMaisProximo != -1) {
+                destinos.inserirFim(destinoMaisProximo);
+            }
         }
-        // Implementar Modelo 1 e 3
     }
 
     private Andar getAndar(int numeroAndar) {
