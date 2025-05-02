@@ -9,10 +9,10 @@ public class Simulador implements Serializable {
     private boolean emExecucao;
     private Predio predio;
 
-    public Simulador(int andares, int elevadores, int velocidadeEmMs, int capacidadeMaxima, int tempoViagemPorAndar, int heuristica) {
+    public Simulador(int andares, int elevadores, int velocidadeEmMs, int capacidadeMaxima, int tempoViagemPorAndar, int heuristica, TipoPainel tipoPainel) {
         this.minutoSimulado = 0;
         this.velocidadeEmMs = velocidadeEmMs;
-        this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndar, heuristica);
+        this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndar, heuristica, tipoPainel);
     }
 
     public Predio getPredio() {
@@ -75,6 +75,4 @@ public class Simulador implements Serializable {
             return null;
         }
     }
-
-
 }

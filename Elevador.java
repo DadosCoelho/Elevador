@@ -1,14 +1,14 @@
 public class Elevador extends EntidadeSimulavel {
     private int id;
-    private int andarAtual; // Andar onde o elevador está
-    private int capacidadeMaxima; // Número máximo de pessoas
-    private Fila pessoasNoElevador; // Pessoas atualmente no elevador
-    private boolean subindo; // Direção atual (true = subindo, false = descendo)
-    private Lista destinos; // Lista de andares destino (chamadas internas e externas)
-    private int tempoViagemPorAndar; // Tempo (em minutos simulados) por andar
-    private boolean emMovimento; // Elevador está se movendo ou parado
+    private int andarAtual;
+    private int capacidadeMaxima;
+    private Fila pessoasNoElevador;
+    private boolean subindo;
+    private Lista destinos;
+    private int tempoViagemPorAndar;
+    private boolean emMovimento;
     private Predio predio;
-    private int heuristica; // Heurística de controle
+    private int heuristica;
     private int minutosRestantesParaMover;
 
     public Elevador(int id, int capacidadeMaxima, int tempoViagemPorAndar, Predio predio, int heuristica) {
@@ -27,16 +27,19 @@ public class Elevador extends EntidadeSimulavel {
     private void escolherProximoDestino() {
         if (heuristica == 1) { // Modelo 1: Sem heurística, ordem de chegada
             if (!destinos.isVazia()) {
-                return; // Já tem destinos na lista, mantidos em ordem de chegada
+                return;
             }
             Ponteiro p = predio.getAndares().getInicio();
             while (p != null && p.isValido()) {
                 Andar andar = (Andar) p.getElemento();
-                if ((andar.getPainel().isBotaoSubirAtivado() && subindo) ||
-                        (andar.getPainel().isBotaoDescerAtivado() && !subindo) ||
+                PainelElevador painel = andar.getPainel();
+                if ((painel.getTipoPainel() == TipoPainel.UNICO_BOTAO && painel.isChamadaGeralAtivada()) ||
+                        (painel.getTipoPainel() == TipoPainel.DOIS_BOTOES &&
+                                ((painel.isBotaoSubirAtivado() && subindo) || (painel.isBotaoDescerAtivado() && !subindo))) ||
+                        (painel.getTipoPainel() == TipoPainel.PAINEL_NUMERICO && !painel.getAndaresDestino().isVazia()) ||
                         !andar.getPessoasAguardando().isVazia()) {
                     destinos.inserirFim(andar.getNumero());
-                    break; // Atende a primeira chamada encontrada
+                    break;
                 }
                 p = p.getProximo();
             }
@@ -62,9 +65,13 @@ public class Elevador extends EntidadeSimulavel {
             Ponteiro p = predio.getAndares().getInicio();
             while (p != null && p.isValido()) {
                 Andar andar = (Andar) p.getElemento();
-                if (!andar.getPessoasAguardando().isVazia() ||
-                        andar.getPainel().isBotaoSubirAtivado() ||
-                        andar.getPainel().isBotaoDescerAtivado()) {
+                PainelElevador painel = andar.getPainel();
+                boolean temChamada = !andar.getPessoasAguardando().isVazia() ||
+                        (painel.getTipoPainel() == TipoPainel.UNICO_BOTAO && painel.isChamadaGeralAtivada()) ||
+                        (painel.getTipoPainel() == TipoPainel.DOIS_BOTOES &&
+                                (painel.isBotaoSubirAtivado() || painel.isBotaoDescerAtivado())) ||
+                        (painel.getTipoPainel() == TipoPainel.PAINEL_NUMERICO && !painel.getAndaresDestino().isVazia());
+                if (temChamada) {
                     int distancia = Math.abs(andar.getNumero() - andarAtual);
                     if (distancia < menorDistancia && (subindo ? andar.getNumero() >= andarAtual : andar.getNumero() <= andarAtual)) {
                         menorDistancia = distancia;
@@ -92,7 +99,7 @@ public class Elevador extends EntidadeSimulavel {
     }
 
     private void desembarcarPessoas() {
-        Fila temp = new Fila(); // Fila temporária para manter pessoas que não desembarcam
+        Fila temp = new Fila();
         while (!pessoasNoElevador.isVazia()) {
             Pessoa pessoa = (Pessoa) pessoasNoElevador.desenfileirar();
             if (pessoa.getAndarDestino() == andarAtual) {
@@ -102,16 +109,15 @@ public class Elevador extends EntidadeSimulavel {
                 temp.enfileirar(pessoa);
             }
         }
-        // Restaura pessoas que não desembarcaram
         while (!temp.isVazia()) {
             pessoasNoElevador.enfileirar(temp.desenfileirar());
         }
     }
 
     private void embarcarPessoas(int andarAtual) {
-        Andar andar = getAndar(andarAtual); // Método auxiliar para obter o andar
+        Andar andar = getAndar(andarAtual);
         Fila pessoasAguardando = andar.getPessoasAguardando();
-        Fila temp = new Fila(); // Fila temporária para manter pessoas que não embarcam
+        Fila temp = new Fila();
 
         // Primeiro, embarca pessoas prioritárias
         while (!pessoasAguardando.isVazia() && pessoasNoElevador.tamanho() < capacidadeMaxima) {
@@ -141,8 +147,10 @@ public class Elevador extends EntidadeSimulavel {
         }
 
         // Reseta o painel após atender chamadas
-        if (pessoasAguardando.isVazia()) {
-            andar.getPainel().resetar();
+        PainelElevador painel = andar.getPainel();
+        if (pessoasAguardando.isVazia() &&
+                (painel.getTipoPainel() != TipoPainel.PAINEL_NUMERICO || painel.getAndaresDestino().isVazia())) {
+            painel.resetar();
         }
     }
 
@@ -183,7 +191,6 @@ public class Elevador extends EntidadeSimulavel {
                 pessoasNoElevador.tamanho() + " pessoas a bordo");
     }
 
-    // Novos getters para corrigir os erros
     public int getId() {
         return id;
     }

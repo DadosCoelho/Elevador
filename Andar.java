@@ -5,18 +5,24 @@ public class Andar implements Serializable {
     private Fila pessoasAguardando;
     private PainelElevador painel;
 
-    public Andar(int numero) {
+    public Andar(int numero, TipoPainel tipoPainel) {
         this.numero = numero;
         this.pessoasAguardando = new FilaPrioridade();
-        this.painel = new PainelElevador();
+        this.painel = new PainelElevador(tipoPainel);
     }
 
     public void adicionarPessoa(Pessoa pessoa) {
         pessoasAguardando.enfileirar(pessoa);
-        if (pessoa.getAndarDestino() > numero) {
-            painel.pressionarSubir();
-        } else if (pessoa.getAndarDestino() < numero) {
-            painel.pressionarDescer();
+        if (painel.getTipoPainel() == TipoPainel.UNICO_BOTAO) {
+            painel.pressionarChamadaGeral();
+        } else if (painel.getTipoPainel() == TipoPainel.DOIS_BOTOES) {
+            if (pessoa.getAndarDestino() > numero) {
+                painel.pressionarSubir();
+            } else if (pessoa.getAndarDestino() < numero) {
+                painel.pressionarDescer();
+            }
+        } else if (painel.getTipoPainel() == TipoPainel.PAINEL_NUMERICO) {
+            painel.pressionarAndar(pessoa.getAndarDestino());
         }
     }
 

@@ -2,11 +2,11 @@ public class Predio extends EntidadeSimulavel {
     private CentralDeControle central;
     private Lista andares;
 
-    public Predio(int quantidadeAndares, int quantidadeElevadores, int capacidadeMaxima, int tempoViagemPorAndar, int heuristica) {
+    public Predio(int quantidadeAndares, int quantidadeElevadores, int capacidadeMaxima, int tempoViagemPorAndar, int heuristica, TipoPainel tipoPainel) {
         central = new CentralDeControle(quantidadeElevadores, this, capacidadeMaxima, tempoViagemPorAndar, heuristica);
         andares = new Lista();
         for (int i = 0; i < quantidadeAndares; i++) {
-            andares.inserirFim(new Andar(i));
+            andares.inserirFim(new Andar(i, tipoPainel));
         }
     }
 
