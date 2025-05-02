@@ -28,7 +28,7 @@ public class Simulador implements Serializable {
         return predio;
     }
 
-    public int getMinutoSimulado() { // Novo método
+    public int getMinutoSimulado() {
         return minutoSimulado;
     }
 
@@ -37,8 +37,6 @@ public class Simulador implements Serializable {
         emExecucao = true;
         iniciarTimer();
         System.out.println("Simulação iniciada.");
-        gui = new InterfaceGrafica(this);
-        gui.setVisible(true);
     }
 
     public void pausar() {
@@ -68,12 +66,11 @@ public class Simulador implements Serializable {
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 predio.atualizar(minutoSimulado++);
-                gui.atualizar(); // Atualiza a interface gráfica a cada ciclo
+                gui.atualizar();
             }
         }, 0, velocidadeEmMs);
     }
 
-    // Método para restaurar a GUI após desserialização
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
         this.gui = new InterfaceGrafica(this);
@@ -100,9 +97,31 @@ public class Simulador implements Serializable {
     }
 
     public boolean isHorarioPico() {
-        int horaSimulada = minutoSimulado / 60; // Converte minutos em horas
+        int horaSimulada = minutoSimulado / 60;
         return (horaSimulada >= 8 && horaSimulada < 10) || (horaSimulada >= 17 && horaSimulada < 19);
     }
 
+    public boolean todasPessoasChegaram() {
+        // Verificar filas de espera nos andares
+        Ponteiro pAndares = predio.getAndares().getInicio();
+        while (pAndares != null && pAndares.isValido()) {
+            Andar andar = (Andar) pAndares.getElemento();
+            if (!andar.getPessoasAguardando().isVazia()) {
+                return false;
+            }
+            pAndares = pAndares.getProximo();
+        }
 
+        // Verificar pessoas nos elevadores
+        Ponteiro pElevadores = predio.getCentral().getElevadores().getInicio();
+        while (pElevadores != null && pElevadores.isValido()) {
+            Elevador elevador = (Elevador) pElevadores.getElemento();
+            if (!elevador.getPessoasNoElevador().isVazia()) {
+                return false;
+            }
+            pElevadores = pElevadores.getProximo();
+        }
+
+        return true;
+    }
 }

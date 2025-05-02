@@ -17,19 +17,35 @@ public class InterfaceGrafica extends JFrame {
 
     @Override
     public void paint(Graphics g) {
-        super.paint(g);
-        Graphics2D g2d = (Graphics2D) g;
+        // Criar um buffer para evitar flickering
+        Image bufferImage = createImage(getWidth(), getHeight());
+        Graphics2D g2d = (Graphics2D) bufferImage.getGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Desenhar andares
-        Ponteiro p = predio.getAndares().getInicio();
-        int y = 50;
+        // Definir fonte para melhor legibilidade
+        g2d.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        // Calcular altura total dos andares
+        int quantidadeAndares = predio.getAndares().tamanho();
         int andarHeight = 50;
+        int margemSuperior = 100; // Espaço para título e estatísticas
+        int alturaTotal = quantidadeAndares * andarHeight;
+
+        // Desenhar andares (do térreo na base para o último andar no topo)
+        Ponteiro p = predio.getAndares().getInicio();
+        int y = getHeight() - andarHeight - 50; // Começar da base da janela
+        int andarIndex = 0;
         while (p != null && p.isValido()) {
             Andar andar = (Andar) p.getElemento();
-            g2d.drawRect(50, y, 100, andarHeight);
-            g2d.drawString("Andar " + andar.getNumero(), 10, y + 20);
-            g2d.drawString("Pessoas: " + andar.getPessoasAguardando().tamanho(), 160, y + 20);
-            y += andarHeight;
+            // Desenhar retângulo do andar
+            g2d.setColor(Color.LIGHT_GRAY);
+            g2d.fillRect(50, y - andarIndex * andarHeight, 100, andarHeight);
+            g2d.setColor(Color.BLACK);
+            g2d.drawRect(50, y - andarIndex * andarHeight, 100, andarHeight);
+            // Desenhar número do andar e quantidade de pessoas
+            g2d.drawString("Andar " + andar.getNumero(), 10, y - andarIndex * andarHeight + 20);
+            g2d.drawString("Pessoas: " + andar.getPessoasAguardando().tamanho(), 160, y - andarIndex * andarHeight + 20);
+            andarIndex++;
             p = p.getProximo();
         }
 
@@ -38,18 +54,28 @@ public class InterfaceGrafica extends JFrame {
         int x = 60;
         while (pElevadores != null && pElevadores.isValido()) {
             Elevador elevador = (Elevador) pElevadores.getElemento();
-            int elevadorY = 50 + (predio.getAndares().tamanho() - elevador.getAndarAtual() - 1) * andarHeight;
+            // Calcular a posição Y do elevador com base no andar atual
+            int elevadorY = y - elevador.getAndarAtual() * andarHeight;
+            g2d.setColor(Color.BLUE);
             g2d.fillRect(x, elevadorY, 30, andarHeight - 10);
+            g2d.setColor(Color.WHITE);
             g2d.drawString("E" + elevador.getId(), x + 5, elevadorY + 20);
             x += 40;
             pElevadores = pElevadores.getProximo();
         }
 
         // Desenhar estatísticas
+        g2d.setColor(Color.BLACK);
         Estatisticas stats = simulador.getEstatisticas();
-        g2d.drawString("Tempo Médio Espera: " + stats.getTempoMedioEspera(), 300, 50);
-        g2d.drawString("Energia Consumida: " + stats.getEnergiaConsumida(), 300, 70);
-        g2d.drawString("Pessoas Transportadas: " + stats.getTotalPessoasTransportadas(), 300, 90);
+        int statsY = 50;
+        g2d.drawString("Tempo Médio Espera: " + String.format("%.2f", stats.getTempoMedioEspera()) + " min", 300, statsY);
+        g2d.drawString("Energia Consumida: " + String.format("%.2f", stats.getEnergiaConsumida()) + " un", 300, statsY + 20);
+        g2d.drawString("Pessoas Transportadas: " + stats.getTotalPessoasTransportadas(), 300, statsY + 40);
+        g2d.drawString("Minuto Simulado: " + simulador.getMinutoSimulado(), 300, statsY + 60);
+
+        // Desenhar o buffer na tela
+        g.drawImage(bufferImage, 0, 0, this);
+        g2d.dispose();
     }
 
     public void atualizar() {
