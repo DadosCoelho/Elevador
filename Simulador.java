@@ -1,4 +1,6 @@
 import java.io.*;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -16,8 +18,10 @@ public class Simulador implements Serializable {
         this.velocidadeEmMs = velocidadeEmMs;
         this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndarPico, tempoViagemPorAndarForaPico, heuristica, tipoPainel, this);
         this.estatisticas = new Estatisticas();
-        this.gui = new InterfaceGrafica(this);
-        this.gui.setVisible(true);
+    }
+
+    public void setGui(InterfaceGrafica gui) {
+        this.gui = gui;
     }
 
     public Estatisticas getEstatisticas() {
@@ -59,6 +63,11 @@ public class Simulador implements Serializable {
         if (timer != null) timer.cancel();
         emExecucao = false;
         System.out.println("Simulação encerrada.");
+        if (gui != null) {
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(gui, "Simulação finalizada! Todas as pessoas chegaram aos seus destinos.");
+            });
+        }
     }
 
     private void iniciarTimer() {
@@ -66,15 +75,18 @@ public class Simulador implements Serializable {
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 predio.atualizar(minutoSimulado++);
-                gui.atualizar();
+                if (todasPessoasChegaram()) {
+                    encerrar();
+                }
+                if (gui != null) {
+                    SwingUtilities.invokeLater(() -> gui.atualizar());
+                }
             }
         }, 0, velocidadeEmMs);
     }
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
-        this.gui = new InterfaceGrafica(this);
-        this.gui.setVisible(true);
     }
 
     public void gravar(String nomeArquivo) {
@@ -102,7 +114,6 @@ public class Simulador implements Serializable {
     }
 
     public boolean todasPessoasChegaram() {
-        // Verificar filas de espera nos andares
         Ponteiro pAndares = predio.getAndares().getInicio();
         while (pAndares != null && pAndares.isValido()) {
             Andar andar = (Andar) pAndares.getElemento();
@@ -112,7 +123,6 @@ public class Simulador implements Serializable {
             pAndares = pAndares.getProximo();
         }
 
-        // Verificar pessoas nos elevadores
         Ponteiro pElevadores = predio.getCentral().getElevadores().getInicio();
         while (pElevadores != null && pElevadores.isValido()) {
             Elevador elevador = (Elevador) pElevadores.getElemento();
