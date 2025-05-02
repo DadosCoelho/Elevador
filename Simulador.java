@@ -9,12 +9,15 @@ public class Simulador implements Serializable {
     private boolean emExecucao;
     private Predio predio;
     private Estatisticas estatisticas;
+    private transient InterfaceGrafica gui;
 
     public Simulador(int andares, int elevadores, int velocidadeEmMs, int capacidadeMaxima, int tempoViagemPorAndarPico, int tempoViagemPorAndarForaPico, int heuristica, TipoPainel tipoPainel) {
         this.minutoSimulado = 0;
         this.velocidadeEmMs = velocidadeEmMs;
         this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndarPico, tempoViagemPorAndarForaPico, heuristica, tipoPainel, this);
         this.estatisticas = new Estatisticas();
+        this.gui = new InterfaceGrafica(this);
+        this.gui.setVisible(true);
     }
 
     public Estatisticas getEstatisticas() {
@@ -34,6 +37,8 @@ public class Simulador implements Serializable {
         emExecucao = true;
         iniciarTimer();
         System.out.println("Simulação iniciada.");
+        gui = new InterfaceGrafica(this);
+        gui.setVisible(true);
     }
 
     public void pausar() {
@@ -63,8 +68,16 @@ public class Simulador implements Serializable {
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 predio.atualizar(minutoSimulado++);
+                gui.atualizar(); // Atualiza a interface gráfica a cada ciclo
             }
         }, 0, velocidadeEmMs);
+    }
+
+    // Método para restaurar a GUI após desserialização
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        this.gui = new InterfaceGrafica(this);
+        this.gui.setVisible(true);
     }
 
     public void gravar(String nomeArquivo) {
@@ -90,4 +103,6 @@ public class Simulador implements Serializable {
         int horaSimulada = minutoSimulado / 60; // Converte minutos em horas
         return (horaSimulada >= 8 && horaSimulada < 10) || (horaSimulada >= 17 && horaSimulada < 19);
     }
+
+
 }
