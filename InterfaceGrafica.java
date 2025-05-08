@@ -41,6 +41,8 @@ public class InterfaceGrafica extends JFrame {
     // Controle de simulação
     private JButton pauseButton;
     private JButton continueButton;
+    public JButton restartButton; // Botão de reiniciar
+    public JButton backToConfigButton; // Botão de voltar para a configuração
     private JSlider velocidadeSlider;
     private JLabel statusLabel;
 
@@ -210,7 +212,7 @@ public class InterfaceGrafica extends JFrame {
         JButton startButton = new JButton("Iniciar Simulação");
         startButton.setFont(new Font("Arial", Font.BOLD, 14));
         startButton.setBackground(new Color(60, 130, 200));
-        startButton.setForeground(Color.WHITE);
+        startButton.setForeground(Color.WHITE); // Cor da letra alterada para branco
         startButton.setFocusPainted(false);
         startButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         startButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
@@ -245,7 +247,9 @@ public class InterfaceGrafica extends JFrame {
 
         // Botão de pausa
         pauseButton = new JButton("Pausar");
-        pauseButton.setBackground(new Color(240, 240, 240));
+        pauseButton.setFont(new Font("Arial", Font.BOLD, 14)); // Adicionar fonte
+        pauseButton.setBackground(new Color(240, 240, 240)); // Cor de fundo igual aos outros botões
+        pauseButton.setForeground(new Color(60, 130, 200)); // Cor da letra
         pauseButton.setFocusPainted(false);
         pauseButton.addActionListener(e -> {
             if (simulador != null) {
@@ -256,13 +260,49 @@ public class InterfaceGrafica extends JFrame {
 
         // Botão de continuar
         continueButton = new JButton("Continuar");
-        continueButton.setBackground(new Color(240, 240, 240));
+        continueButton.setFont(new Font("Arial", Font.BOLD, 14)); // Adicionar fonte
+        continueButton.setBackground(new Color(240, 240, 240)); // Cor de fundo igual aos outros botões
+        continueButton.setForeground(new Color(60, 130, 200)); // Cor da letra
         continueButton.setFocusPainted(false);
         continueButton.setEnabled(false);
         continueButton.addActionListener(e -> {
             if (simulador != null) {
                 simulador.continuar();
                 updateControlButtons(true);
+            }
+        });
+
+        // Botão de reiniciar
+        restartButton = new JButton("Reiniciar Simulação");
+        restartButton.setFont(new Font("Arial", Font.BOLD, 14)); // Adicionar fonte
+        restartButton.setBackground(new Color(240, 240, 240)); // Cor de fundo igual aos outros botões
+        restartButton.setForeground(new Color(60, 130, 200)); // Cor da letra
+        restartButton.setFocusPainted(false);
+        restartButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        restartButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        restartButton.setVisible(false); // Inicialmente invisível
+
+        restartButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                reiniciarSimulacao();
+            }
+        });
+
+        // Botão de voltar para a configuração
+        backToConfigButton = new JButton("Voltar para Configuração");
+        backToConfigButton.setFont(new Font("Arial", Font.BOLD, 14));
+        backToConfigButton.setBackground(new Color(240, 240, 240));
+        backToConfigButton.setForeground(new Color(60, 130, 200));
+        backToConfigButton.setFocusPainted(false);
+        backToConfigButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        backToConfigButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        backToConfigButton.setVisible(false);
+        backToConfigButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cardLayout.show(mainPanel, "Config");
+                reiniciarConfiguracao(); // Reiniciar a configuração ao voltar
             }
         });
 
@@ -287,6 +327,8 @@ public class InterfaceGrafica extends JFrame {
         // Adicionar componentes ao painel
         panel.add(pauseButton);
         panel.add(continueButton);
+        panel.add(restartButton); // Adicione o botão ao painel de controle
+        panel.add(backToConfigButton); // Adicione o botão de voltar
         panel.add(new JSeparator(JSeparator.VERTICAL));
         panel.add(velocidadeLabel);
         panel.add(velocidadeSlider);
@@ -296,7 +338,7 @@ public class InterfaceGrafica extends JFrame {
         return panel;
     }
 
-    private void updateControlButtons(boolean isRunning) {
+    public void updateControlButtons(boolean isRunning) {
         pauseButton.setEnabled(isRunning);
         continueButton.setEnabled(!isRunning);
         statusLabel.setText(isRunning ? "Simulação em andamento" : "Simulação pausada");
@@ -402,6 +444,8 @@ public class InterfaceGrafica extends JFrame {
 
         updateControlButtons(true);
         statusLabel.setText("Simulação iniciada");
+        restartButton.setVisible(false); // Esconder o botão de reiniciar ao iniciar
+        backToConfigButton.setVisible(false); // Mostrar o botão de voltar ao iniciar
         simulador.iniciar();
     }
 
@@ -618,7 +662,6 @@ public class InterfaceGrafica extends JFrame {
             pElevadores = pElevadores.getProximo();
         }
 
-
         pessoasTextArea.setText(sb.toString());
     }
 
@@ -643,5 +686,84 @@ public class InterfaceGrafica extends JFrame {
             p = p.getProximo();
         }
         return null;
+    }
+
+    private void reiniciarSimulacao() {
+        // Obter parâmetros da simulação atual
+        int andares = Integer.parseInt(andaresField.getText());
+        int elevadores = Integer.parseInt(elevadoresField.getText());
+        int capacidade = Integer.parseInt(capacidadeField.getText());
+        int velocidade = Integer.parseInt(velocidadeField.getText());
+        int tempoPico = Integer.parseInt(tempoPicoField.getText());
+        int tempoForaPico = Integer.parseInt(tempoForaPicoField.getText());
+        int heuristica = heuristicaCombo.getSelectedIndex() + 1;
+        TipoPainel tipoPainel = TipoPainel.valueOf((String) painelCombo.getSelectedItem());
+        int quantidadePessoas = Integer.parseInt(pessoasField.getText());
+
+        // Criar novo simulador
+        simulador = new Simulador(andares, elevadores, velocidade, capacidade, tempoPico, tempoForaPico, heuristica, tipoPainel);
+        simulador.setGui(this);
+        predio = simulador.getPredio();
+
+        // Configurar o slider com o valor inicial
+        velocidadeSlider.setValue(velocidade);
+
+        // Ajustar o tamanho preferido do predioPanel com base no número de andares e elevadores
+        int minAndarHeight = 50;
+        int minElevadorWidth = 60;
+        int espacoEntreElevadores = 10;
+        int margemEsquerda = 80;
+        int margemSuperior = 30;
+        int margemDireita = 80;
+        int margemInferior = 30;
+
+        int panelWidth = margemEsquerda + (elevadores * (minElevadorWidth + espacoEntreElevadores)) + margemDireita;
+        int panelHeight = margemSuperior + (andares * minAndarHeight) + margemInferior;
+        predioPanel.setPreferredSize(new Dimension(panelWidth, panelHeight));
+
+        // Forçar o JScrollPane a revalidar para exibir barras de rolagem, se necessário
+        predioScrollPane.revalidate();
+        predioScrollPane.repaint();
+
+        GerenciadorSimulacao gerenciador = new GerenciadorSimulacao();
+        List<Pessoa> pessoas = gerenciador.gerarListaPessoas(quantidadePessoas, andares, null);
+        for (Pessoa pessoa : pessoas) {
+            Andar andar = getAndarPorNumero(predio, pessoa.getAndarOrigem());
+            if (andar != null) {
+                andar.adicionarPessoa(pessoa);
+            }
+        }
+
+        // Reiniciar a simulação
+        updateControlButtons(true);
+        statusLabel.setText("Simulação reiniciada");
+        restartButton.setVisible(false); // Esconder o botão de reiniciar ao iniciar
+        backToConfigButton.setVisible(true); // Mostrar o botão de voltar ao iniciar
+        simulador.iniciar();
+    }
+
+    private void reiniciarConfiguracao() {
+        andaresField.setText("5");
+        elevadoresField.setText("2");
+        capacidadeField.setText("8");
+        velocidadeField.setText("1000");
+        tempoPicoField.setText("2");
+        tempoForaPicoField.setText("1");
+        heuristicaCombo.setSelectedIndex(0);
+        painelCombo.setSelectedIndex(0);
+        pessoasField.setText("10");
+
+        // Limpar estatísticas e estado atual
+        if (simulador != null) {
+            simulador.getEstatisticas().zerar();
+            predio.resetar();
+            simulador.setMinutoSimulado(0);
+        }
+
+        // Ajustar visibilidade dos botões
+        restartButton.setVisible(false);
+        backToConfigButton.setVisible(false);
+        updateControlButtons(false);
+        statusLabel.setText("Pronto para iniciar");
     }
 }

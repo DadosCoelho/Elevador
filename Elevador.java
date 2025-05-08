@@ -216,7 +216,15 @@ public class Elevador extends EntidadeSimulavel {
         return andarAtual;
     }
 
+    public void setAndarAtual(int andarAtual) {
+        this.andarAtual = andarAtual;
+    }
+
     public Fila getPessoasNoElevador() {
         return pessoasNoElevador;
+    }
+
+    public Lista getDestinos() {
+        return destinos;
     }
 }

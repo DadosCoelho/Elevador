@@ -36,6 +36,10 @@ public class Simulador implements Serializable {
         return minutoSimulado;
     }
 
+    public void setMinutoSimulado(int minutoSimulado) {
+        this.minutoSimulado = minutoSimulado;
+    }
+
     public void iniciar() {
         if (emExecucao) return;
         emExecucao = true;
@@ -66,6 +70,9 @@ public class Simulador implements Serializable {
         if (gui != null) {
             SwingUtilities.invokeLater(() -> {
                 JOptionPane.showMessageDialog(gui, "Simulação finalizada! Todas as pessoas chegaram aos seus destinos.");
+                gui.restartButton.setVisible(true); // Tornar o botão de reiniciar visível
+                gui.backToConfigButton.setVisible(true); // Mostrar o botão de voltar
+                gui.updateControlButtons(false); // Desativar botões de pausa e continuar
             });
         }
     }

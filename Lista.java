@@ -95,4 +95,9 @@ public class Lista implements Serializable {
             atual = atual.proximo;
         }
     }
+
+    public void limpar() {
+        inicio = null;
+        tamanho = 0;
+    }
 }

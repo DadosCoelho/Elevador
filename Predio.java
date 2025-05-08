@@ -22,4 +22,25 @@ public class Predio extends EntidadeSimulavel {
     public CentralDeControle getCentral() {
         return central;
     }
+
+    public void resetar() {
+        // Limpar andares
+        Ponteiro pAndares = andares.getInicio();
+        while (pAndares != null && pAndares.isValido()) {
+            Andar andar = (Andar) pAndares.getElemento();
+            andar.getPessoasAguardando().limpar();
+            andar.getPainel().resetar();
+            pAndares = pAndares.getProximo();
+        }
+
+        // Limpar elevadores
+        Ponteiro pElevadores = getCentral().getElevadores().getInicio();
+        while (pElevadores != null && pElevadores.isValido()) {
+            Elevador elevador = (Elevador) pElevadores.getElemento();
+            elevador.getPessoasNoElevador().limpar();
+            elevador.getDestinos().limpar();
+            elevador.setAndarAtual(0);
+            pElevadores = pElevadores.getProximo();
+        }
+    }
 }

@@ -46,4 +46,11 @@ public class Estatisticas implements Serializable {
     public int getTotalPessoasTransportadas() {
         return totalPessoasTransportadas;
     }
+
+    public void zerar() {
+        temposEspera.clear();
+        chamadasAtendidas = 0;
+        energiaConsumida = 0.0;
+        totalPessoasTransportadas = 0;
+    }
 }

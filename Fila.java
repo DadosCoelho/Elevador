@@ -85,4 +85,10 @@ public class Fila implements Serializable {
     public Ponteiro getPonteiroInicio() {
         return new Ponteiro(inicio);
     }
+
+    public void limpar() {
+        inicio = null;
+        fim = null;
+        tamanho = 0;
+    }
 }
