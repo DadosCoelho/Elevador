@@ -132,24 +132,16 @@ public class Simulador implements Serializable {
     }
 
     public boolean todasPessoasChegaram() {
-        Ponteiro pAndares = predio.getAndares().getInicio();
-        while (pAndares != null && pAndares.isValido()) {
-            Andar andar = (Andar) pAndares.getElemento();
-            if (!andar.getPessoasAguardando().isVazia()) {
-                return false;
+        // Verificar se todas as pessoas já chegaram ao destino
+        if (gui != null && gui.pessoas != null) {
+            for (Pessoa pessoa : gui.pessoas) {
+                if (!pessoa.isChegouAoDestino()) {
+                    return false; // Ainda há pessoas que não chegaram ao destino
+                }
             }
-            pAndares = pAndares.getProximo();
         }
 
-        Ponteiro pElevadores = predio.getCentral().getElevadores().getInicio();
-        while (pElevadores != null && pElevadores.isValido()) {
-            Elevador elevador = (Elevador) pElevadores.getElemento();
-            if (!elevador.getPessoasNoElevador().isVazia()) {
-                return false;
-            }
-            pElevadores = pElevadores.getProximo();
-        }
-
+        // Se não houver pessoas ou todas já chegaram, retornar true
         return true;
     }
 

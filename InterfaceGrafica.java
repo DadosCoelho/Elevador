@@ -51,7 +51,7 @@ public class InterfaceGrafica extends JFrame {
     private JLabel velocidadeLabel;
 
     private Timer adicionarPessoasTimer; // Timer para adicionar pessoas
-    private List<Pessoa> pessoas; // Lista de pessoas a serem adicionadas
+    public List<Pessoa> pessoas; // Lista de pessoas a serem adicionadas
 
     public InterfaceGrafica() {
         setTitle("Simulador de Elevadores");
@@ -516,15 +516,24 @@ public class InterfaceGrafica extends JFrame {
         TimerTask adicionarPessoasTask = new TimerTask() {
             @Override
             public void run() {
+                List<Pessoa> pessoasRemover = new ArrayList<>(); // Lista para armazenar pessoas a serem removidas
+
                 for (Pessoa pessoa : pessoas) {
-                    if (simuladorLocal.deveAdicionarPessoa(pessoa) && !predio.pessoaJaNoSistema(pessoa)) {
+                    if (!pessoa.isChegouAoDestino() && simuladorLocal.deveAdicionarPessoa(pessoa) && !predio.pessoaJaNoSistema(pessoa)) {
                         Andar andar = getAndarPorNumero(predio, pessoa.getAndarOrigem());
                         if (andar != null) {
                             andar.adicionarPessoa(pessoa);
                             System.out.println("Pessoa " + pessoa.getId() + " adicionada ao andar " + andar.getNumero() + " no minuto " + pessoa.getMinutoChegada());
                         }
                     }
+                    if (pessoa.isChegouAoDestino()) {
+                        pessoasRemover.add(pessoa); // Adicionar à lista de remoção
+                    }
                 }
+
+                // Remover as pessoas que chegaram ao destino
+                pessoas.removeAll(pessoasRemover);
+
                 SwingUtilities.invokeLater(() -> gui.atualizar()); // Atualiza a interface gráfica
             }
         };
@@ -751,6 +760,17 @@ public class InterfaceGrafica extends JFrame {
                 pPessoas = pPessoas.getProximo();
             }
             pElevadores = pElevadores.getProximo();
+        }
+
+        // Adicionar pessoas que já chegaram ao destino
+        for (Pessoa pessoa : pessoas) {
+            if (pessoa.isChegouAoDestino()) {
+                sb.append(String.format("│ P%-3d │ Andar %-2d (Destino) │ Andar %-3d │ %-12d │\n",
+                        pessoa.getId(),
+                        pessoa.getPosicaoAtual(),
+                        pessoa.getAndarDestino(),
+                        pessoa.getMinutoChegada()));
+            }
         }
 
         pessoasTextArea.setText(sb.toString());

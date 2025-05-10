@@ -7,6 +7,7 @@ public class Pessoa implements Serializable {
     private boolean dentroElevador;
     private boolean prioritaria; // Cadeirante ou idoso
     private int minutoChegada;
+    private boolean chegouAoDestino; // Novo atributo
 
     public Pessoa(int id, int origem, int destino, boolean prioritaria, int minutoChegada) {
         this.id = id;
@@ -15,6 +16,7 @@ public class Pessoa implements Serializable {
         this.dentroElevador = false;
         this.prioritaria = prioritaria;
         this.minutoChegada = minutoChegada;
+        this.chegouAoDestino = false; // Inicialmente, a pessoa não chegou ao destino
     }
 
     public int getMinutoChegada() {
@@ -51,5 +53,23 @@ public class Pessoa implements Serializable {
 
     public void setDentroElevador(boolean dentroElevador) {
         this.dentroElevador = dentroElevador;
+    }
+
+    public boolean isChegouAoDestino() {
+        return chegouAoDestino;
+    }
+
+    public void setChegouAoDestino(boolean chegouAoDestino) {
+        this.chegouAoDestino = chegouAoDestino;
+    }
+
+    public int getPosicaoAtual() {
+        if (chegouAoDestino) {
+            return andarDestino; // Retorna o andar de destino como posição atual
+        } else if (dentroElevador) {
+            return -1; // Retorna -1 para indicar que está dentro do elevador
+        } else {
+            return andarOrigem; // Retorna o andar de origem como posição atual
+        }
     }
 }

@@ -107,6 +107,8 @@ public class Elevador extends EntidadeSimulavel {
             Pessoa pessoa = (Pessoa) pessoasNoElevador.desenfileirar();
             if (pessoa.getAndarDestino() == andarAtual) {
                 pessoa.sairElevador();
+                pessoa.setDentroElevador(false); // Garante que a pessoa não está mais no elevador
+                pessoa.setChegouAoDestino(true); // Marca a pessoa como tendo chegado ao destino
                 System.out.println("Pessoa " + pessoa.getId() + " desembarcou no andar " + andarAtual);
             } else {
                 temp.enfileirar(pessoa);
