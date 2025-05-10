@@ -48,4 +48,8 @@ public class Pessoa implements Serializable {
     public boolean isPrioritaria() {
         return prioritaria;
     }
+
+    public void setDentroElevador(boolean dentroElevador) {
+        this.dentroElevador = dentroElevador;
+    }
 }

@@ -5,6 +5,9 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class InterfaceGrafica extends JFrame {
     private Predio predio;
@@ -46,6 +49,9 @@ public class InterfaceGrafica extends JFrame {
     private JSlider velocidadeSlider;
     private JLabel statusLabel;
     private JLabel velocidadeLabel;
+
+    private Timer adicionarPessoasTimer; // Timer para adicionar pessoas
+    private List<Pessoa> pessoas; // Lista de pessoas a serem adicionadas
 
     public InterfaceGrafica() {
         setTitle("Simulador de Elevadores");
@@ -372,7 +378,6 @@ public class InterfaceGrafica extends JFrame {
         panel.add(pauseButton);
         panel.add(continueButton);
         panel.add(restartButton); // Adicione o botão ao painel de controle
-        panel.add(backToConfigButton); // Adicione o botão de voltar
         panel.add(new JSeparator(JSeparator.VERTICAL));
         panel.add(velocidadeLabel);
         panel.add(velocidadeSlider);
@@ -490,19 +495,41 @@ public class InterfaceGrafica extends JFrame {
         predioScrollPane.repaint();
 
         GerenciadorSimulacao gerenciador = new GerenciadorSimulacao();
-        List<Pessoa> pessoas = gerenciador.gerarListaPessoas(quantidadePessoas, andares, null);
-        for (Pessoa pessoa : pessoas) {
-            Andar andar = getAndarPorNumero(predio, pessoa.getAndarOrigem());
-            if (andar != null) {
-                andar.adicionarPessoa(pessoa);
-            }
+        pessoas = gerenciador.gerarListaPessoas(quantidadePessoas, andares, null);
+
+        // Adicionar as pessoas no momento correto
+        agendarAdicaoDePessoas();
+
+        statusLabel.setText("Simulação pronta para iniciar");
+    }
+
+    private void agendarAdicaoDePessoas() {
+        // Cancelar o timer anterior, se existir
+        if (adicionarPessoasTimer != null) {
+            adicionarPessoasTimer.cancel();
         }
 
-        //updateControlButtons(true);
-        statusLabel.setText("Simulação pronta para iniciar");
-        //restartButton.setVisible(false); // Esconder o botão de reiniciar ao iniciar
-        //backToConfigButton.setVisible(true); // Mostrar o botão de voltar ao iniciar
-        //simulador.iniciar();
+        adicionarPessoasTimer = new Timer();
+        InterfaceGrafica gui = this;
+        Simulador simuladorLocal = this.simulador; // Referência local ao simulador
+
+        TimerTask adicionarPessoasTask = new TimerTask() {
+            @Override
+            public void run() {
+                for (Pessoa pessoa : pessoas) {
+                    if (simuladorLocal.deveAdicionarPessoa(pessoa) && !predio.pessoaJaNoSistema(pessoa)) {
+                        Andar andar = getAndarPorNumero(predio, pessoa.getAndarOrigem());
+                        if (andar != null) {
+                            andar.adicionarPessoa(pessoa);
+                            System.out.println("Pessoa " + pessoa.getId() + " adicionada ao andar " + andar.getNumero() + " no minuto " + pessoa.getMinutoChegada());
+                        }
+                    }
+                }
+                SwingUtilities.invokeLater(() -> gui.atualizar()); // Atualiza a interface gráfica
+            }
+        };
+
+        adicionarPessoasTimer.scheduleAtFixedRate(adicionarPessoasTask, 0, simulador.getVelocidadeEmMs());
     }
 
     private void renderizarPredio(Graphics2D g2d) {
@@ -682,21 +709,25 @@ public class InterfaceGrafica extends JFrame {
     private void atualizarListaPessoas() {
         StringBuilder sb = new StringBuilder();
         sb.append("Lista de Pessoas:\n");
-        sb.append("┌──────┬─────────────────────┬───────────┐\n");
-        sb.append("   ID     Posição Atual    Destino    \n");
-        sb.append("├──────┼─────────────────────┼───────────┤\n");
+        sb.append("┌──────┬─────────────────────┬───────────┬──────────────┐\n");
+        sb.append("│   ID │   Posição Atual     │ Destino   │ Chegada      │\n");
+        sb.append("├──────┼─────────────────────┼───────────┼──────────────┤\n");
 
         Ponteiro pAndares = predio.getAndares().getInicio();
         while (pAndares != null && pAndares.isValido()) {
             Andar andar = (Andar) pAndares.getElemento();
             Ponteiro pPessoas = andar.getPessoasAguardando().getPonteiroInicio();
             while (pPessoas != null && pPessoas.isValido()) {
-                Pessoa pessoa =(Pessoa) pPessoas.getElemento();
-                sb.append(String.format(" P%-3d  Andar %-2d %-9s  Andar %-3d \n",
-                        pessoa.getId(),
-                        andar.getNumero(),
-                        pessoa.isPrioritaria() ? "(PRIOR.)" : "(Aguard.)",
-                        pessoa.getAndarDestino()));
+                Pessoa pessoa = (Pessoa) pPessoas.getElemento();
+                // Adiciona a condição para exibir a pessoa apenas no minuto de chegada
+                if (simulador.getMinutoSimulado() >= pessoa.getMinutoChegada()) {
+                    sb.append(String.format("│ P%-3d │ Andar %-2d %-9s │ Andar %-3d │ %-12d │\n",
+                            pessoa.getId(),
+                            andar.getNumero(),
+                            pessoa.isPrioritaria() ? "(PRIOR.)" : "(Aguard.)",
+                            pessoa.getAndarDestino(),
+                            pessoa.getMinutoChegada()));
+                }
                 pPessoas = pPessoas.getProximo();
             }
             pAndares = pAndares.getProximo();
@@ -708,11 +739,15 @@ public class InterfaceGrafica extends JFrame {
             Ponteiro pPessoas = elevador.getPessoasNoElevador().getPonteiroInicio();
             while (pPessoas != null && pPessoas.isValido()) {
                 Pessoa pessoa = (Pessoa) pPessoas.getElemento();
-                sb.append(String.format("  P%-3d   Elevador %-1d (A%-2d)     Andar %-3d  \n",
-                        pessoa.getId(),
-                        elevador.getId(),
-                        elevador.getAndarAtual(),
-                        pessoa.getAndarDestino()));
+                // Adiciona a condição para exibir a pessoa apenas no minuto de chegada
+                if (simulador.getMinutoSimulado() >= pessoa.getMinutoChegada()) {
+                    sb.append(String.format("│ P%-3d │ Elevador %-1d (A%-2d)  │ Andar %-3d │ %-12d │\n",
+                            pessoa.getId(),
+                            elevador.getId(),
+                            elevador.getAndarAtual(),
+                            pessoa.getAndarDestino(),
+                            pessoa.getMinutoChegada()));
+                }
                 pPessoas = pPessoas.getProximo();
             }
             pElevadores = pElevadores.getProximo();
@@ -782,20 +817,12 @@ public class InterfaceGrafica extends JFrame {
         predioScrollPane.repaint();
 
         GerenciadorSimulacao gerenciador = new GerenciadorSimulacao();
-        List<Pessoa> pessoas = gerenciador.gerarListaPessoas(quantidadePessoas, andares, null);
-        for (Pessoa pessoa : pessoas) {
-            Andar andar = getAndarPorNumero(predio, pessoa.getAndarOrigem());
-            if (andar != null) {
-                andar.adicionarPessoa(pessoa);
-            }
-        }
+        pessoas = gerenciador.gerarListaPessoas(quantidadePessoas, andares, null);
 
-        // Reiniciar a simulação
-        updateControlButtons(true);
-        statusLabel.setText("Simulação reiniciada");
-        restartButton.setVisible(false); // Esconder o botão de reiniciar ao iniciar
-        backToConfigButton.setVisible(true); // Mostrar o botão de voltar ao iniciar
-        //simulador.iniciar();
+        // Adicionar as pessoas no momento correto
+        agendarAdicaoDePessoas();
+
+        statusLabel.setText("Simulação pronta para iniciar");
     }
 
     private void reiniciarConfiguracao() {
@@ -821,5 +848,11 @@ public class InterfaceGrafica extends JFrame {
         backToConfigButton.setVisible(false);
         updateControlButtons(false);
         statusLabel.setText("Pronto para iniciar");
+
+        // Cancelar o timer de adição de pessoas
+        if (adicionarPessoasTimer != null) {
+            adicionarPessoasTimer.cancel();
+            adicionarPessoasTimer = null;
+        }
     }
 }

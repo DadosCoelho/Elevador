@@ -46,4 +46,17 @@ public class Andar implements Serializable {
     public PainelElevador getPainel() {
         return painel;
     }
+
+    public void removerPessoa(Pessoa pessoa) {
+        Fila novaFila = new FilaPrioridade();
+        Ponteiro p = pessoasAguardando.getPonteiroInicio();
+        while (p != null && p.isValido()) {
+            Pessoa pessoaNaFila = (Pessoa) p.getElemento();
+            if (pessoaNaFila.getId() != pessoa.getId()) {
+                novaFila.enfileirar(pessoaNaFila);
+            }
+            p = p.getProximo();
+        }
+        pessoasAguardando = novaFila;
+    }
 }

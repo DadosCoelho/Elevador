@@ -4,9 +4,9 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class GerenciadorSimulacao {
-    public List<Pessoa> gerarListaPessoas(int quantidadePessoas, int quantidadeAndares, Scanner scanner) {
+    public List gerarListaPessoas(int quantidadePessoas, int quantidadeAndares, Scanner scanner) {
         Random random = new Random();
-        List<Pessoa> pessoas = new ArrayList<>();
+        List pessoas = new ArrayList<>();
 
         for (int i = 1; i <= quantidadePessoas; i++) {
             // Gerar andar de origem aleatoriamente

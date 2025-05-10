@@ -40,6 +40,15 @@ public class Simulador implements Serializable {
         this.minutoSimulado = minutoSimulado;
     }
 
+    public int getVelocidadeEmMs() {
+        return velocidadeEmMs;
+    }
+
+    // Novo método para obter o tempo atual da simulação em milissegundos
+    public long getTempoSimulacaoEmMs() {
+        return (long) minutoSimulado * velocidadeEmMs;
+    }
+
     public void iniciar() {
         if (emExecucao) return;
         emExecucao = true;
@@ -85,9 +94,7 @@ public class Simulador implements Serializable {
                 if (todasPessoasChegaram()) {
                     encerrar();
                 }
-                if (gui != null) {
-                    SwingUtilities.invokeLater(() -> gui.atualizar());
-                }
+                atualizarInterface();
             }
         }, 0, velocidadeEmMs);
     }
@@ -144,5 +151,15 @@ public class Simulador implements Serializable {
         }
 
         return true;
+    }
+
+    public void atualizarInterface() {
+        if (gui != null) {
+            SwingUtilities.invokeLater(() -> gui.atualizar());
+        }
+    }
+
+    public boolean deveAdicionarPessoa(Pessoa pessoa) {
+        return minutoSimulado >= pessoa.getMinutoChegada();
     }
 }

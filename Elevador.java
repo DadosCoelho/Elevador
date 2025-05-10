@@ -227,4 +227,17 @@ public class Elevador extends EntidadeSimulavel {
     public Lista getDestinos() {
         return destinos;
     }
+
+    public void removerPessoa(Pessoa pessoa) {
+        Fila novaFila = new Fila();
+        Ponteiro p = pessoasNoElevador.getPonteiroInicio();
+        while (p != null && p.isValido()) {
+            Pessoa pessoaNaFila = (Pessoa) p.getElemento();
+            if (pessoaNaFila.getId() != pessoa.getId()) {
+                novaFila.enfileirar(pessoaNaFila);
+            }
+            p = p.getProximo();
+        }
+        pessoasNoElevador = novaFila;
+    }
 }
