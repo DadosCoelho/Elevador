@@ -53,6 +53,10 @@ public class InterfaceGrafica extends JFrame {
     private Timer adicionarPessoasTimer; // Timer para adicionar pessoas
     public List<Pessoa> pessoas; // Lista de pessoas a serem adicionadas
 
+    // Componentes para o log do elevador
+    private JComboBox<Integer> elevadorLogCombo;
+    private JTextArea logTextArea;
+
     public InterfaceGrafica() {
         setTitle("Simulador de Elevadores");
         setSize(1200, 700);
@@ -111,10 +115,45 @@ public class InterfaceGrafica extends JFrame {
                 BorderFactory.createLineBorder(new Color(120, 120, 120)),
                 "Pessoas", TitledBorder.LEFT, TitledBorder.TOP,
                 new Font("Arial", Font.BOLD, 12), new Color(50, 50, 50)));
-        // Criar um JPanel para envolver o JScrollPane e definir a largura fixa
-        JPanel pessoasPanel = new JPanel(new BorderLayout());
-        pessoasPanel.setPreferredSize(new Dimension(300, 600)); // Largura fixa de 300, altura de 600
-        pessoasPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Painel para envolver a lista de pessoas e o log do elevador
+        JPanel pessoasPanel = new JPanel(new GridLayout(2, 1));
+        pessoasPanel.setPreferredSize(new Dimension(450, 600)); // Largura fixa, altura para dividir verticalmente
+
+        // Painel para a lista de pessoas
+        JPanel listaPessoasPanel = new JPanel(new BorderLayout());
+        listaPessoasPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Painel para o log do elevador
+        JPanel logElevadorPanel = new JPanel(new BorderLayout());
+
+        // Adiciona a ComboBox para selecionar o elevador
+        elevadorLogCombo = new JComboBox<>();
+        elevadorLogCombo.setPreferredSize(new Dimension(50, elevadorLogCombo.getPreferredSize().height)); // Define a largura preferencial
+        elevadorLogCombo.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                atualizarLogElevador();
+            }
+        });
+        JPanel elevadorLogPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        elevadorLogPanel.add(new JLabel("Selecionar Elevador:"));
+        elevadorLogPanel.add(elevadorLogCombo);
+        logElevadorPanel.add(elevadorLogPanel, BorderLayout.NORTH);
+
+        // Adiciona a área de texto para exibir o log
+        logTextArea = new JTextArea();
+        logTextArea.setEditable(false);
+        logTextArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        JScrollPane logScrollPane = new JScrollPane(logTextArea);
+        logScrollPane.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(120, 120, 120)),
+                "Log do Elevador", TitledBorder.LEFT, TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 12), new Color(50, 50, 50)));
+        logElevadorPanel.add(logScrollPane, BorderLayout.CENTER);
+
+        // Adiciona os painéis ao painel principal
+        pessoasPanel.add(listaPessoasPanel);
+        pessoasPanel.add(logElevadorPanel);
 
         // Painel de controle de simulação
         controlPanel = criarPainelControle();
@@ -127,7 +166,7 @@ public class InterfaceGrafica extends JFrame {
         westPanel.add(controlPanel, BorderLayout.SOUTH);
 
         simulationPanel.add(westPanel, BorderLayout.CENTER);
-        simulationPanel.add(scrollPane, BorderLayout.EAST);
+        simulationPanel.add(pessoasPanel, BorderLayout.EAST);
 
         mainPanel.add(configPanel, "Config");
         mainPanel.add(simulationPanel, "Simulation");
@@ -170,12 +209,12 @@ public class InterfaceGrafica extends JFrame {
 
         // Campos de texto
         andaresField = new JTextField("12", 10);
-        elevadoresField = new JTextField("7", 10);
-        capacidadeField = new JTextField("8", 10);
+        elevadoresField = new JTextField("13", 10);
+        capacidadeField = new JTextField("5", 10);
         velocidadeField = new JTextField("1000", 10);
         tempoPicoField = new JTextField("2", 10);
         tempoForaPicoField = new JTextField("1", 10);
-        pessoasField = new JTextField("30", 10);
+        pessoasField = new JTextField("3    00", 10);
 
         // Estilização dos campos
         JTextField[] fields = {andaresField, elevadoresField, capacidadeField,
@@ -500,6 +539,9 @@ public class InterfaceGrafica extends JFrame {
         // Adicionar as pessoas no momento correto
         agendarAdicaoDePessoas();
 
+        // Atualizar a ComboBox com os IDs dos elevadores
+        atualizarComboBoxElevadores();
+
         statusLabel.setText("Simulação pronta para iniciar");
     }
 
@@ -713,14 +755,16 @@ public class InterfaceGrafica extends JFrame {
         atualizarEstatisticas();
         predioPanel.repaint();
         predioScrollPane.revalidate();
+        atualizarComboBoxElevadores(); // Atualiza a ComboBox de elevadores
+        atualizarLogElevador(); // Atualiza o log do elevador
     }
 
     private void atualizarListaPessoas() {
         StringBuilder sb = new StringBuilder();
         sb.append("Lista de Pessoas:\n");
-        sb.append("┌──────┬─────────────────────┬───────────┬──────────────┐\n");
-        sb.append("│   ID │   Posição Atual     │ Destino   │ Chegada      │\n");
-        sb.append("├──────┼─────────────────────┼───────────┼──────────────┤\n");
+        sb.append("\n");
+        sb.append("   ID       Posição Atual         Destino       Chegada      \n");
+        sb.append("\n");
 
         Ponteiro pAndares = predio.getAndares().getInicio();
         while (pAndares != null && pAndares.isValido()) {
@@ -730,7 +774,7 @@ public class InterfaceGrafica extends JFrame {
                 Pessoa pessoa = (Pessoa) pPessoas.getElemento();
                 // Adiciona a condição para exibir a pessoa apenas no minuto de chegada
                 if (simulador.getMinutoSimulado() >= pessoa.getMinutoChegada()) {
-                    sb.append(String.format("│ P%-3d │ Andar %-2d %-9s │ Andar %-3d │ %-12d │\n",
+                    sb.append(String.format("  P%-3d      Andar %-2d %-9s      Andar %-3d      %-12d  \n",
                             pessoa.getId(),
                             andar.getNumero(),
                             pessoa.isPrioritaria() ? "(PRIOR.)" : "(Aguard.)",
@@ -750,7 +794,7 @@ public class InterfaceGrafica extends JFrame {
                 Pessoa pessoa = (Pessoa) pPessoas.getElemento();
                 // Adiciona a condição para exibir a pessoa apenas no minuto de chegada
                 if (simulador.getMinutoSimulado() >= pessoa.getMinutoChegada()) {
-                    sb.append(String.format("│ P%-3d │ Elevador %-1d (A%-2d)  │ Andar %-3d │ %-12d │\n",
+                    sb.append(String.format("  P%-3d      Elevador %-1d (A%-2d)        Andar %-3d      %-12d  \n",
                             pessoa.getId(),
                             elevador.getId(),
                             elevador.getAndarAtual(),
@@ -765,7 +809,7 @@ public class InterfaceGrafica extends JFrame {
         // Adicionar pessoas que já chegaram ao destino
         for (Pessoa pessoa : pessoas) {
             if (pessoa.isChegouAoDestino()) {
-                sb.append(String.format("│ P%-3d │ Andar %-2d (Destino) │ Andar %-3d │ %-12d │\n",
+                sb.append(String.format("  P%-3d      Andar %-2d (Destino)      Andar %-3d      %-12d  \n",
                         pessoa.getId(),
                         pessoa.getPosicaoAtual(),
                         pessoa.getAndarDestino(),
@@ -785,6 +829,53 @@ public class InterfaceGrafica extends JFrame {
         statsPanel.add(new JLabel("Minuto Simulado: " + simulador.getMinutoSimulado()));
         statsPanel.revalidate();
         statsPanel.repaint();
+    }
+
+    // Método para atualizar a ComboBox com os IDs dos elevadores
+    private void atualizarComboBoxElevadores() {
+        Integer selectedElevadorId = (Integer) elevadorLogCombo.getSelectedItem(); // Salva o ID do elevador selecionado
+
+        elevadorLogCombo.removeAllItems();
+        if (predio != null && predio.getCentral() != null) {
+            Lista<Elevador> elevadores = predio.getCentral().getElevadores();
+            Ponteiro p = elevadores.getInicio();
+            while (p != null && p.isValido()) {
+                Elevador elevador = (Elevador) p.getElemento();
+                elevadorLogCombo.addItem(elevador.getId());
+                p = p.getProximo();
+            }
+        }
+
+        // Restaura a seleção anterior, se possível
+        if (selectedElevadorId != null) {
+            elevadorLogCombo.setSelectedItem(selectedElevadorId);
+        }
+    }
+
+    // Método para atualizar a área de texto com o log do elevador selecionado
+    private void atualizarLogElevador() {
+        logTextArea.setText("");
+        Integer selectedElevadorId = (Integer) elevadorLogCombo.getSelectedItem();
+        if (selectedElevadorId != null && predio != null && predio.getCentral() != null) {
+            Lista elevadores = predio.getCentral().getElevadores();
+            Ponteiro p = elevadores.getInicio();
+            while (p != null && p.isValido()) {
+                Elevador elevador = (Elevador) p.getElemento();
+                if (elevador.getId() == selectedElevadorId) {
+                    Lista<LogElevador> logs = elevador.getLogs();
+                    Ponteiro pLog = logs.getInicio();
+                    StringBuilder logText = new StringBuilder();
+                    while (pLog != null && pLog.isValido()) {
+                        LogElevador log = (LogElevador) pLog.getElemento();
+                        logText.append(log.toString()).append("\n");
+                        pLog = pLog.getProximo();
+                    }
+                    logTextArea.setText(logText.toString());
+                    break;
+                }
+                p = p.getProximo();
+            }
+        }
     }
 
     private Andar getAndarPorNumero(Predio predio, int numero) {
@@ -842,19 +933,22 @@ public class InterfaceGrafica extends JFrame {
         // Adicionar as pessoas no momento correto
         agendarAdicaoDePessoas();
 
+        // Atualizar a ComboBox com os IDs dos elevadores
+        atualizarComboBoxElevadores();
+
         statusLabel.setText("Simulação pronta para iniciar");
     }
 
     private void reiniciarConfiguracao() {
-        andaresField.setText("12");
-        elevadoresField.setText("7");
+        andaresField.setText("10");
+        elevadoresField.setText("13");
         capacidadeField.setText("8");
         velocidadeField.setText("1000");
         tempoPicoField.setText("2");
         tempoForaPicoField.setText("1");
         heuristicaCombo.setSelectedIndex(0);
         painelCombo.setSelectedIndex(0);
-        pessoasField.setText("30");
+        pessoasField.setText("300");
 
         // Limpar estatísticas e estado atual
         if (simulador != null) {

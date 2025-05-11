@@ -1,3 +1,5 @@
+import java.io.Serializable;
+
 public class Elevador extends EntidadeSimulavel {
     private int id;
     private int andarAtual;
@@ -12,6 +14,7 @@ public class Elevador extends EntidadeSimulavel {
     private int minutosRestantesParaMover;
     private int tempoViagemPorAndarPico;
     private int tempoViagemPorAndarForaPico;
+    private Lista<LogElevador> logs; // Lista de logs
 
     public Elevador(int id, int capacidadeMaxima, int tempoViagemPorAndarPico, int tempoViagemPorAndarForaPico, Predio predio, int heuristica) {
         this.id = id;
@@ -25,6 +28,7 @@ public class Elevador extends EntidadeSimulavel {
         this.emMovimento = false;
         this.predio = predio;
         this.heuristica = heuristica;
+        this.logs = new Lista<>(); // Inicializa a lista de logs
     }
 
     private void escolherProximoDestino() {
@@ -42,6 +46,7 @@ public class Elevador extends EntidadeSimulavel {
                         (painel.getTipoPainel() == TipoPainel.PAINEL_NUMERICO && !painel.getAndaresDestino().isVazia()) ||
                         !andar.getPessoasAguardando().isVazia()) {
                     destinos.inserirFim(andar.getNumero());
+                    adicionarLog(((Predio)predio).getCentral().getSimulador().getMinutoSimulado(), "Escolheu andar " + andar.getNumero() + " como próximo destino (Modelo 1)"); // Adiciona log
                     break;
                 }
                 p = p.getProximo();
@@ -61,6 +66,7 @@ public class Elevador extends EntidadeSimulavel {
             }
             if (andarEscolhido != -1) {
                 destinos.inserirFim(andarEscolhido);
+                adicionarLog(((Predio)predio).getCentral().getSimulador().getMinutoSimulado(), "Escolheu andar " + andarEscolhido + " como próximo destino (Modelo 2)"); // Adiciona log
             }
         } else if (heuristica == 3) { // Modelo 3: Otimização de energia
             int destinoMaisProximo = -1;
@@ -85,6 +91,7 @@ public class Elevador extends EntidadeSimulavel {
             }
             if (destinoMaisProximo != -1) {
                 destinos.inserirFim(destinoMaisProximo);
+                adicionarLog(((Predio)predio).getCentral().getSimulador().getMinutoSimulado(), "Escolheu andar " + destinoMaisProximo + " como próximo destino (Modelo 3)"); // Adiciona log
             }
         }
     }
@@ -110,6 +117,7 @@ public class Elevador extends EntidadeSimulavel {
                 pessoa.setDentroElevador(false); // Garante que a pessoa não está mais no elevador
                 pessoa.setChegouAoDestino(true); // Marca a pessoa como tendo chegado ao destino
                 System.out.println("Pessoa " + pessoa.getId() + " desembarcou no andar " + andarAtual);
+                adicionarLog(((Predio)predio).getCentral().getSimulador().getMinutoSimulado(), "Pessoa " + pessoa.getId() + " desembarcou no andar " + andarAtual); // Adiciona log
             } else {
                 temp.enfileirar(pessoa);
             }
@@ -136,6 +144,7 @@ public class Elevador extends EntidadeSimulavel {
                 simulador.getEstatisticas().registrarChamadaAtendida();
                 simulador.getEstatisticas().registrarPessoaTransportada();
                 System.out.println("Pessoa " + pessoa.getId() + " (prioritária) embarcou no andar " + andarAtual);
+                adicionarLog(simulador.getMinutoSimulado(), "Pessoa " + pessoa.getId() + " (prioritária) embarcou no andar " + andarAtual); // Adiciona log
             } else {
                 temp.enfileirar(pessoa);
             }
@@ -151,6 +160,7 @@ public class Elevador extends EntidadeSimulavel {
             simulador.getEstatisticas().registrarChamadaAtendida();
             simulador.getEstatisticas().registrarPessoaTransportada();
             System.out.println("Pessoa " + pessoa.getId() + " embarcou no andar " + andarAtual);
+            adicionarLog(simulador.getMinutoSimulado(), "Pessoa " + pessoa.getId() + " embarcou no andar " + andarAtual); // Adiciona log
         }
 
         while (!temp.isVazia()) {
@@ -241,5 +251,16 @@ public class Elevador extends EntidadeSimulavel {
             p = p.getProximo();
         }
         pessoasNoElevador = novaFila;
+    }
+
+    // Método para adicionar um log à lista de logs
+    public void adicionarLog(int minutoSimulado, String decisao) {
+        LogElevador log = new LogElevador(minutoSimulado, andarAtual, decisao, id);
+        logs.inserirFim(log);
+    }
+
+    // Método para obter a lista de logs
+    public Lista<LogElevador> getLogs() {
+        return logs;
     }
 }

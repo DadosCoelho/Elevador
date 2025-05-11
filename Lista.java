@@ -1,27 +1,27 @@
 import java.io.Serializable;
 
-public class Lista implements Serializable {
-    public class No implements NoGenerico {
-        private Object elemento;
+public class Lista<T> implements Serializable {
+    public class No implements NoGenerico<T> {
+        private T elemento;
         private No proximo;
 
-        No(Object elemento) {
+        No(T elemento) {
             this.elemento = elemento;
             this.proximo = null;
         }
 
         @Override
-        public Object getElemento() {
+        public T getElemento() {
             return elemento;
         }
 
         @Override
-        public NoGenerico getProximo() {
+        public NoGenerico<T> getProximo() {
             return proximo;
         }
 
         @Override
-        public void setProximo(NoGenerico proximo) {
+        public void setProximo(NoGenerico<T> proximo) {
             this.proximo = (No) proximo;
         }
     }
@@ -34,7 +34,7 @@ public class Lista implements Serializable {
         this.tamanho = 0;
     }
 
-    public void inserirFim(Object elemento) {
+    public void inserirFim(T elemento) {
         No novoNo = new No(elemento);
         if (inicio == null) {
             inicio = novoNo;
@@ -48,7 +48,7 @@ public class Lista implements Serializable {
         tamanho++;
     }
 
-    public void inserirInicio(Object elemento) {
+    public void inserirInicio(T elemento) {
         No novoNo = new No(elemento);
         novoNo.proximo = inicio;
         inicio = novoNo;
@@ -67,7 +67,7 @@ public class Lista implements Serializable {
         return tamanho;
     }
 
-    public boolean contem(Object elemento) {
+    public boolean contem(T elemento) {
         No atual = inicio;
         while (atual != null) {
             if (atual.elemento == null && elemento == null || atual.elemento != null && atual.elemento.equals(elemento)) {
@@ -78,7 +78,7 @@ public class Lista implements Serializable {
         return false;
     }
 
-    public void remover(Object elemento) {
+    public void remover(T elemento) {
         if (inicio == null) return;
         if (inicio.elemento != null && inicio.elemento.equals(elemento)) {
             inicio = inicio.proximo;
