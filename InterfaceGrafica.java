@@ -214,7 +214,7 @@ public class InterfaceGrafica extends JFrame {
         velocidadeField = new JTextField("1000", 10);
         tempoPicoField = new JTextField("2", 10);
         tempoForaPicoField = new JTextField("1", 10);
-        pessoasField = new JTextField("3    00", 10);
+        pessoasField = new JTextField("300", 10);
 
         // Estilização dos campos
         JTextField[] fields = {andaresField, elevadoresField, capacidadeField,
@@ -417,6 +417,7 @@ public class InterfaceGrafica extends JFrame {
         panel.add(pauseButton);
         panel.add(continueButton);
         panel.add(restartButton); // Adicione o botão ao painel de controle
+        panel.add(backToConfigButton);
         panel.add(new JSeparator(JSeparator.VERTICAL));
         panel.add(velocidadeLabel);
         panel.add(velocidadeSlider);
@@ -543,6 +544,7 @@ public class InterfaceGrafica extends JFrame {
         atualizarComboBoxElevadores();
 
         statusLabel.setText("Simulação pronta para iniciar");
+        simulador.pausar();
     }
 
     private void agendarAdicaoDePessoas() {
@@ -827,6 +829,10 @@ public class InterfaceGrafica extends JFrame {
         statsPanel.add(new JLabel("Energia Consumida: " + String.format("%.2f", stats.getEnergiaConsumida()) + " un"));
         statsPanel.add(new JLabel("Pessoas Transportadas: " + stats.getTotalPessoasTransportadas()));
         statsPanel.add(new JLabel("Minuto Simulado: " + simulador.getMinutoSimulado()));
+        String[] tipoPainel = {"Único Botão", "Dois Botões", "Painel Numérico"};
+        statsPanel.add(new JLabel("Tipo Painel: " + tipoPainel[painelCombo.getSelectedIndex()]));
+        String[] heuristicas = {"1 - Ordem de Chegada", "2 - Otimização de Tempo", "3 - Otimização de Energia"};
+        statsPanel.add(new JLabel("Modelo: " + heuristicas[heuristicaCombo.getSelectedIndex()]));
         statsPanel.revalidate();
         statsPanel.repaint();
     }
@@ -937,6 +943,7 @@ public class InterfaceGrafica extends JFrame {
         atualizarComboBoxElevadores();
 
         statusLabel.setText("Simulação pronta para iniciar");
+        simulador.pausar();
     }
 
     private void reiniciarConfiguracao() {
