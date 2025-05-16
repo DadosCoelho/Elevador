@@ -14,7 +14,7 @@ public class Elevador extends EntidadeSimulavel {
     private int minutosRestantesParaMover;
     private int tempoViagemPorAndarPico;
     private int tempoViagemPorAndarForaPico;
-    private Lista<LogElevador> logs; // Lista de logs
+    private Lista<LogElevador> logs;
 
     public Elevador(int id, int capacidadeMaxima, int tempoViagemPorAndarPico, int tempoViagemPorAndarForaPico, Predio predio, int heuristica) {
         this.id = id;
@@ -28,72 +28,7 @@ public class Elevador extends EntidadeSimulavel {
         this.emMovimento = false;
         this.predio = predio;
         this.heuristica = heuristica;
-        this.logs = new Lista<>(); // Inicializa a lista de logs
-    }
-
-    private void escolherProximoDestino() {
-        if (heuristica == 1) { // Modelo 1: Sem heurística, ordem de chegada
-            if (!destinos.isVazia()) {
-                return;
-            }
-            Ponteiro p = predio.getAndares().getInicio();
-            while (p != null && p.isValido()) {
-                Andar andar = (Andar) p.getElemento();
-                PainelElevador painel = andar.getPainel();
-                if ((painel.getTipoPainel() == TipoPainel.UNICO_BOTAO && painel.isChamadaGeralAtivada()) ||
-                        (painel.getTipoPainel() == TipoPainel.DOIS_BOTOES &&
-                                ((painel.isBotaoSubirAtivado() && subindo) || (painel.isBotaoDescerAtivado() && !subindo))) ||
-                        (painel.getTipoPainel() == TipoPainel.PAINEL_NUMERICO && !painel.getAndaresDestino().isVazia()) ||
-                        !andar.getPessoasAguardando().isVazia()) {
-                    destinos.inserirFim(andar.getNumero());
-                    adicionarLog(((Predio)predio).getCentral().getSimulador().getMinutoSimulado(), "Escolheu andar " + andar.getNumero() + " como próximo destino (Modelo 1)"); // Adiciona log
-                    break;
-                }
-                p = p.getProximo();
-            }
-        } else if (heuristica == 2) { // Modelo 2: Otimização de tempo
-            int maiorFila = 0;
-            int andarEscolhido = -1;
-            Ponteiro p = predio.getAndares().getInicio();
-            while (p != null && p.isValido()) {
-                Andar andar = (Andar) p.getElemento();
-                int tamanhoFila = andar.getPessoasAguardando().tamanho();
-                if (tamanhoFila > maiorFila && (subindo ? andar.getNumero() > andarAtual : andar.getNumero() < andarAtual)) {
-                    maiorFila = tamanhoFila;
-                    andarEscolhido = andar.getNumero();
-                }
-                p = p.getProximo();
-            }
-            if (andarEscolhido != -1) {
-                destinos.inserirFim(andarEscolhido);
-                adicionarLog(((Predio)predio).getCentral().getSimulador().getMinutoSimulado(), "Escolheu andar " + andarEscolhido + " como próximo destino (Modelo 2)"); // Adiciona log
-            }
-        } else if (heuristica == 3) { // Modelo 3: Otimização de energia
-            int destinoMaisProximo = -1;
-            int menorDistancia = Integer.MAX_VALUE;
-            Ponteiro p = predio.getAndares().getInicio();
-            while (p != null && p.isValido()) {
-                Andar andar = (Andar) p.getElemento();
-                PainelElevador painel = andar.getPainel();
-                boolean temChamada = !andar.getPessoasAguardando().isVazia() ||
-                        (painel.getTipoPainel() == TipoPainel.UNICO_BOTAO && painel.isChamadaGeralAtivada()) ||
-                        (painel.getTipoPainel() == TipoPainel.DOIS_BOTOES &&
-                                (painel.isBotaoSubirAtivado() || painel.isBotaoDescerAtivado())) ||
-                        (painel.getTipoPainel() == TipoPainel.PAINEL_NUMERICO && !painel.getAndaresDestino().isVazia());
-                if (temChamada) {
-                    int distancia = Math.abs(andar.getNumero() - andarAtual);
-                    if (distancia < menorDistancia && (subindo ? andar.getNumero() >= andarAtual : andar.getNumero() <= andarAtual)) {
-                        menorDistancia = distancia;
-                        destinoMaisProximo = andar.getNumero();
-                    }
-                }
-                p = p.getProximo();
-            }
-            if (destinoMaisProximo != -1) {
-                destinos.inserirFim(destinoMaisProximo);
-                adicionarLog(((Predio)predio).getCentral().getSimulador().getMinutoSimulado(), "Escolheu andar " + destinoMaisProximo + " como próximo destino (Modelo 3)"); // Adiciona log
-            }
-        }
+        this.logs = new Lista<>();
     }
 
     private Andar getAndar(int numeroAndar) {
@@ -114,10 +49,10 @@ public class Elevador extends EntidadeSimulavel {
             Pessoa pessoa = (Pessoa) pessoasNoElevador.desenfileirar();
             if (pessoa.getAndarDestino() == andarAtual) {
                 pessoa.sairElevador();
-                pessoa.setDentroElevador(false); // Garante que a pessoa não está mais no elevador
-                pessoa.setChegouAoDestino(true); // Marca a pessoa como tendo chegado ao destino
+                pessoa.setDentroElevador(false);
+                pessoa.setChegouAoDestino(true);
                 System.out.println("Pessoa " + pessoa.getId() + " desembarcou no andar " + andarAtual);
-                adicionarLog(((Predio)predio).getCentral().getSimulador().getMinutoSimulado(), "Pessoa " + pessoa.getId() + " desembarcou no andar " + andarAtual); // Adiciona log
+                adicionarLog(((Predio)predio).getCentral().getSimulador().getMinutoSimulado(), "Pessoa " + pessoa.getId() + " desembarcou no andar " + andarAtual);
             } else {
                 temp.enfileirar(pessoa);
             }
@@ -144,7 +79,7 @@ public class Elevador extends EntidadeSimulavel {
                 simulador.getEstatisticas().registrarChamadaAtendida();
                 simulador.getEstatisticas().registrarPessoaTransportada();
                 System.out.println("Pessoa " + pessoa.getId() + " (prioritária) embarcou no andar " + andarAtual);
-                adicionarLog(simulador.getMinutoSimulado(), "Pessoa " + pessoa.getId() + " (prioritária) embarcou no andar " + andarAtual); // Adiciona log
+                adicionarLog(simulador.getMinutoSimulado(), "Pessoa " + pessoa.getId() + " (prioritária) embarcou no andar " + andarAtual);
             } else {
                 temp.enfileirar(pessoa);
             }
@@ -160,7 +95,7 @@ public class Elevador extends EntidadeSimulavel {
             simulador.getEstatisticas().registrarChamadaAtendida();
             simulador.getEstatisticas().registrarPessoaTransportada();
             System.out.println("Pessoa " + pessoa.getId() + " embarcou no andar " + andarAtual);
-            adicionarLog(simulador.getMinutoSimulado(), "Pessoa " + pessoa.getId() + " embarcou no andar " + andarAtual); // Adiciona log
+            adicionarLog(simulador.getMinutoSimulado(), "Pessoa " + pessoa.getId() + " embarcou no andar " + andarAtual);
         }
 
         while (!temp.isVazia()) {
@@ -210,7 +145,7 @@ public class Elevador extends EntidadeSimulavel {
                 embarcarPessoas(andarAtual);
                 destinos.remover(andarAtual);
             }
-            escolherProximoDestino();
+            ((Predio) predio).getCentral().escolherProximoDestino(this);
             if (!destinos.isVazia()) {
                 emMovimento = true;
                 minutosRestantesParaMover = tempoViagemPorAndar;
@@ -253,14 +188,28 @@ public class Elevador extends EntidadeSimulavel {
         pessoasNoElevador = novaFila;
     }
 
-    // Método para adicionar um log à lista de logs
     public void adicionarLog(int minutoSimulado, String decisao) {
         LogElevador log = new LogElevador(minutoSimulado, andarAtual, decisao, id);
         logs.inserirFim(log);
     }
 
-    // Método para obter a lista de logs
     public Lista<LogElevador> getLogs() {
         return logs;
+    }
+
+    public boolean isSubindo() {
+        return subindo;
+    }
+
+    public void setSubindo(boolean subindo) {
+        this.subindo = subindo;
+    }
+
+    public int getHeuristica() {
+        return heuristica;
+    }
+
+    public Predio getPredio() {
+        return predio;
     }
 }
