@@ -1,12 +1,10 @@
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
 public class GerenciadorSimulacao {
-    public List gerarListaPessoas(int quantidadePessoas, int quantidadeAndares, Scanner scanner) {
+    public Lista<Pessoa> gerarListaPessoas(int quantidadePessoas, int quantidadeAndares, Scanner scanner) {
         Random random = new Random();
-        List pessoas = new ArrayList<>();
+        Lista<Pessoa> pessoas = new Lista<>();
 
         for (int i = 1; i <= quantidadePessoas; i++) {
             // Gerar andar de origem aleatoriamente
@@ -26,7 +24,7 @@ public class GerenciadorSimulacao {
 
             // Criar pessoa e adicionar à lista
             Pessoa pessoa = new Pessoa(i, andarOrigem, andarDestino, prioritaria, minutoChegada);
-            pessoas.add(pessoa);
+            pessoas.inserirFim(pessoa);
         }
 
         return pessoas;

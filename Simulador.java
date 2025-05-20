@@ -134,10 +134,13 @@ public class Simulador implements Serializable {
     public boolean todasPessoasChegaram() {
         // Verificar se todas as pessoas já chegaram ao destino
         if (gui != null && gui.pessoas != null) {
-            for (Pessoa pessoa : gui.pessoas) {
+            Ponteiro p = gui.pessoas.getInicio();
+            while (p != null && p.isValido()) {
+                Pessoa pessoa = (Pessoa) p.getElemento();
                 if (!pessoa.isChegouAoDestino()) {
-                    return false; // Ainda há pessoas que não chegaram ao destino
+                    return false;
                 }
+                p = p.getProximo();
             }
         }
 

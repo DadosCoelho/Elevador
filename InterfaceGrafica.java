@@ -2,10 +2,6 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -44,16 +40,15 @@ public class InterfaceGrafica extends JFrame {
     // Controle de simulação
     private JButton pauseButton;
     private JButton continueButton;
-    public JButton restartButton; // Botão de reiniciar
-    public JButton backToConfigButton; // Botão de voltar para a configuração
+    public JButton restartButton;
+    public JButton backToConfigButton;
     private JSlider velocidadeSlider;
     private JLabel statusLabel;
     private JLabel velocidadeLabel;
 
-    private Timer adicionarPessoasTimer; // Timer para adicionar pessoas
-    public List<Pessoa> pessoas; // Lista de pessoas a serem adicionadas
+    private Timer adicionarPessoasTimer;
+    public Lista<Pessoa> pessoas; // Alterado de List<Pessoa> para Lista<Pessoa>
 
-    // Componentes para o log do elevador
     private JComboBox<Integer> elevadorLogCombo;
     private JTextArea logTextArea;
 
@@ -62,7 +57,7 @@ public class InterfaceGrafica extends JFrame {
         setSize(1200, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setExtendedState(JFrame.MAXIMIZED_BOTH); // Inicia maximizado
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -74,11 +69,9 @@ public class InterfaceGrafica extends JFrame {
         mainPanel = new JPanel(cardLayout);
         configPanel = criarPainelConfiguracao();
 
-        // Painel de simulação com layout melhorado
         simulationPanel = new JPanel(new BorderLayout(10, 10));
         simulationPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Painel do prédio com desenho avançado
         predioPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -91,13 +84,11 @@ public class InterfaceGrafica extends JFrame {
         predioPanel.setBackground(new Color(240, 240, 240));
         predioPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        // Adicionar o predioPanel a um JScrollPane
         predioScrollPane = new JScrollPane(predioPanel);
         predioScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         predioScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         predioScrollPane.setBorder(BorderFactory.createEmptyBorder());
 
-        // Painel de estatísticas com melhor aparência
         statsPanel = new JPanel();
         statsPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 20, 5));
         statsPanel.setBorder(BorderFactory.createTitledBorder(
@@ -105,7 +96,6 @@ public class InterfaceGrafica extends JFrame {
                 "Estatísticas", TitledBorder.LEFT, TitledBorder.TOP,
                 new Font("Arial", Font.BOLD, 12), new Color(50, 50, 50)));
 
-        // Texto de pessoas mais organizado
         pessoasTextArea = new JTextArea();
         pessoasTextArea.setEditable(false);
         pessoasTextArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
@@ -116,20 +106,16 @@ public class InterfaceGrafica extends JFrame {
                 "Pessoas", TitledBorder.LEFT, TitledBorder.TOP,
                 new Font("Arial", Font.BOLD, 12), new Color(50, 50, 50)));
 
-        // Painel para envolver a lista de pessoas e o log do elevador
         JPanel pessoasPanel = new JPanel(new GridLayout(2, 1));
-        pessoasPanel.setPreferredSize(new Dimension(450, 600)); // Largura fixa, altura para dividir verticalmente
+        pessoasPanel.setPreferredSize(new Dimension(450, 600));
 
-        // Painel para a lista de pessoas
         JPanel listaPessoasPanel = new JPanel(new BorderLayout());
         listaPessoasPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Painel para o log do elevador
         JPanel logElevadorPanel = new JPanel(new BorderLayout());
 
-        // Adiciona a ComboBox para selecionar o elevador
         elevadorLogCombo = new JComboBox<>();
-        elevadorLogCombo.setPreferredSize(new Dimension(50, elevadorLogCombo.getPreferredSize().height)); // Define a largura preferencial
+        elevadorLogCombo.setPreferredSize(new Dimension(50, elevadorLogCombo.getPreferredSize().height));
         elevadorLogCombo.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 atualizarLogElevador();
@@ -140,7 +126,6 @@ public class InterfaceGrafica extends JFrame {
         elevadorLogPanel.add(elevadorLogCombo);
         logElevadorPanel.add(elevadorLogPanel, BorderLayout.NORTH);
 
-        // Adiciona a área de texto para exibir o log
         logTextArea = new JTextArea();
         logTextArea.setEditable(false);
         logTextArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
@@ -151,14 +136,11 @@ public class InterfaceGrafica extends JFrame {
                 new Font("Arial", Font.BOLD, 12), new Color(50, 50, 50)));
         logElevadorPanel.add(logScrollPane, BorderLayout.CENTER);
 
-        // Adiciona os painéis ao painel principal
         pessoasPanel.add(listaPessoasPanel);
         pessoasPanel.add(logElevadorPanel);
 
-        // Painel de controle de simulação
         controlPanel = criarPainelControle();
 
-        // Montagem dos painéis
         JPanel westPanel = new JPanel(new BorderLayout());
         westPanel.setPreferredSize(new Dimension(700, 600));
         westPanel.add(statsPanel, BorderLayout.NORTH);
@@ -179,12 +161,10 @@ public class InterfaceGrafica extends JFrame {
         JPanel panel = new JPanel(new BorderLayout(20, 20));
         panel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
 
-        // Título do painel de configuração
         JLabel titleLabel = new JLabel("Configuração da Simulação", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
 
-        // Painel de campos configuração
         JPanel fieldsPanel = new JPanel(new GridBagLayout());
         fieldsPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
@@ -207,7 +187,6 @@ public class InterfaceGrafica extends JFrame {
                 "Quantidade de Pessoas:"
         };
 
-        // Campos de texto
         andaresField = new JTextField("12", 10);
         elevadoresField = new JTextField("13", 10);
         capacidadeField = new JTextField("5", 10);
@@ -216,7 +195,6 @@ public class InterfaceGrafica extends JFrame {
         tempoForaPicoField = new JTextField("1", 10);
         pessoasField = new JTextField("300", 10);
 
-        // Estilização dos campos
         JTextField[] fields = {andaresField, elevadoresField, capacidadeField,
                 velocidadeField, tempoPicoField, tempoForaPicoField, pessoasField};
         for (JTextField field : fields) {
@@ -225,7 +203,6 @@ public class InterfaceGrafica extends JFrame {
                     BorderFactory.createEmptyBorder(5, 5, 5, 5)));
         }
 
-        // Comboboxes com estilos
         String[] heuristicas = {"1 - Ordem de Chegada", "2 - Otimização de Tempo", "3 - Otimização de Energia"};
         heuristicaCombo = new JComboBox<>(heuristicas);
         heuristicaCombo.setSelectedIndex(0);
@@ -234,7 +211,6 @@ public class InterfaceGrafica extends JFrame {
         painelCombo = new JComboBox<>(paineis);
         painelCombo.setSelectedIndex(0);
 
-        // Adicionando labels e campos ao painel
         int row = 0;
         for (int i = 0; i < labels.length; i++) {
             JLabel label = new JLabel(labels[i]);
@@ -259,7 +235,6 @@ public class InterfaceGrafica extends JFrame {
             row++;
         }
 
-        // Botão de iniciar com estilo
         JButton startButton = criarBotao("Iniciar Simulação", new Color(60, 130, 200));
         startButton.setForeground(new Color(60, 130, 200));
         startButton.addActionListener(new ActionListener() {
@@ -272,11 +247,9 @@ public class InterfaceGrafica extends JFrame {
             }
         });
 
-        // Painel para o botão
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 20));
         buttonPanel.add(startButton);
 
-        // Montagem do painel de configuração
         panel.add(titleLabel, BorderLayout.NORTH);
         panel.add(fieldsPanel, BorderLayout.CENTER);
         panel.add(buttonPanel, BorderLayout.SOUTH);
@@ -290,10 +263,9 @@ public class InterfaceGrafica extends JFrame {
                 BorderFactory.createMatteBorder(1, 0, 0, 0, Color.GRAY),
                 BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
-        // Botão de pausa
         pauseButton = criarBotao("Pausar", new Color(240, 240, 240));
         pauseButton.setForeground(new Color(60, 130, 200));
-        pauseButton.setVisible(false); // Inicialmente invisível
+        pauseButton.setVisible(false);
         pauseButton.addActionListener(e -> {
             if (simulador != null) {
                 simulador.pausar();
@@ -303,13 +275,11 @@ public class InterfaceGrafica extends JFrame {
                 restartButton.setVisible(true);
                 backToConfigButton.setVisible(true);
                 updateControlButtons(false);
-                // Tornar invisível
                 velocidadeLabel.setVisible(false);
                 velocidadeSlider.setVisible(false);
             }
         });
 
-        // Botão de continuar (inicialmente "Iniciar")
         continueButton = criarBotao("Iniciar", new Color(240, 240, 240));
         continueButton.setForeground(new Color(60, 130, 200));
         continueButton.addActionListener(e -> {
@@ -319,7 +289,6 @@ public class InterfaceGrafica extends JFrame {
                     continueButton.setVisible(false);
                     pauseButton.setVisible(true);
                     updateControlButtons(true);
-                    // Tornar visível
                     velocidadeLabel.setVisible(true);
                     velocidadeSlider.setVisible(true);
                 } else {
@@ -329,17 +298,15 @@ public class InterfaceGrafica extends JFrame {
                     restartButton.setVisible(false);
                     backToConfigButton.setVisible(false);
                     updateControlButtons(true);
-                    // Manter visível
                     velocidadeLabel.setVisible(true);
                     velocidadeSlider.setVisible(true);
                 }
             }
         });
 
-        // Botão de reiniciar
         restartButton = criarBotao("Reiniciar Simulação", new Color(240, 240, 240));
         restartButton.setForeground(new Color(60, 130, 200));
-        restartButton.setVisible(false); // Inicialmente invisível
+        restartButton.setVisible(false);
         restartButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -356,14 +323,12 @@ public class InterfaceGrafica extends JFrame {
                     restartButton.setVisible(false);
                     backToConfigButton.setVisible(false);
                     updateControlButtons(false);
-                    // Tornar invisível
                     velocidadeLabel.setVisible(false);
                     velocidadeSlider.setVisible(false);
                 }
             }
         });
 
-        // Botão de voltar para a configuração
         backToConfigButton = criarBotao("Voltar para Configuração", new Color(240, 240, 240));
         backToConfigButton.setForeground(new Color(60, 130, 200));
         backToConfigButton.setVisible(false);
@@ -377,24 +342,22 @@ public class InterfaceGrafica extends JFrame {
                         JOptionPane.QUESTION_MESSAGE);
                 if (resposta == JOptionPane.YES_OPTION) {
                     cardLayout.show(mainPanel, "Config");
-                    reiniciarConfiguracao(); // Reiniciar a configuração ao voltar
+                    reiniciarConfiguracao();
                     pauseButton.setVisible(false);
                     continueButton.setText("Iniciar");
                     continueButton.setVisible(true);
                     restartButton.setVisible(false);
                     backToConfigButton.setVisible(false);
                     updateControlButtons(false);
-                    // Tornar invisível
                     velocidadeLabel.setVisible(false);
                     velocidadeSlider.setVisible(false);
                 }
             }
         });
 
-        // Slider de velocidade
         velocidadeLabel = new JLabel("Velocidade: ");
         velocidadeSlider = new JSlider(JSlider.HORIZONTAL, 100, 2000, 1000);
-        velocidadeSlider.setInverted(true); // Valores menores = mais rápido
+        velocidadeSlider.setInverted(true);
         velocidadeSlider.setPreferredSize(new Dimension(150, 30));
         velocidadeSlider.addChangeListener(e -> {
             if (simulador != null && !velocidadeSlider.getValueIsAdjusting()) {
@@ -405,18 +368,15 @@ public class InterfaceGrafica extends JFrame {
             }
         });
 
-        // Inicialmente invisível
         velocidadeLabel.setVisible(false);
         velocidadeSlider.setVisible(false);
 
-        // Label de status
         statusLabel = new JLabel("Pronto para iniciar");
         statusLabel.setFont(new Font("Arial", Font.ITALIC, 12));
 
-        // Adicionar componentes ao painel
         panel.add(pauseButton);
         panel.add(continueButton);
-        panel.add(restartButton); // Adicione o botão ao painel de controle
+        panel.add(restartButton);
         panel.add(backToConfigButton);
         panel.add(new JSeparator(JSeparator.VERTICAL));
         panel.add(velocidadeLabel);
@@ -427,12 +387,11 @@ public class InterfaceGrafica extends JFrame {
         return panel;
     }
 
-    // Método para criar botões padronizados
     private JButton criarBotao(String texto, Color corFundo) {
         JButton botao = new JButton(texto);
         botao.setFont(new Font("Arial", Font.BOLD, 14));
         botao.setBackground(corFundo);
-        botao.setForeground(Color.WHITE); // Cor da letra alterada para branco
+        botao.setForeground(Color.WHITE);
         botao.setFocusPainted(false);
         botao.setCursor(new Cursor(Cursor.HAND_CURSOR));
         botao.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
@@ -514,10 +473,8 @@ public class InterfaceGrafica extends JFrame {
         simulador.setGui(this);
         predio = simulador.getPredio();
 
-        // Configurar o slider com o valor inicial
         velocidadeSlider.setValue(velocidade);
 
-        // Ajustar o tamanho preferido do predioPanel com base no número de andares e elevadores
         int minAndarHeight = 50;
         int minElevadorWidth = 60;
         int espacoEntreElevadores = 10;
@@ -530,17 +487,14 @@ public class InterfaceGrafica extends JFrame {
         int panelHeight = margemSuperior + (andares * minAndarHeight) + margemInferior;
         predioPanel.setPreferredSize(new Dimension(panelWidth, panelHeight));
 
-        // Forçar o JScrollPane a revalidar para exibir barras de rolagem, se necessário
         predioScrollPane.revalidate();
         predioScrollPane.repaint();
 
         GerenciadorSimulacao gerenciador = new GerenciadorSimulacao();
         pessoas = gerenciador.gerarListaPessoas(quantidadePessoas, andares, null);
 
-        // Adicionar as pessoas no momento correto
         agendarAdicaoDePessoas();
 
-        // Atualizar a ComboBox com os IDs dos elevadores
         atualizarComboBoxElevadores();
 
         statusLabel.setText("Simulação pronta para iniciar");
@@ -548,21 +502,22 @@ public class InterfaceGrafica extends JFrame {
     }
 
     private void agendarAdicaoDePessoas() {
-        // Cancelar o timer anterior, se existir
         if (adicionarPessoasTimer != null) {
             adicionarPessoasTimer.cancel();
         }
 
         adicionarPessoasTimer = new Timer();
         InterfaceGrafica gui = this;
-        Simulador simuladorLocal = this.simulador; // Referência local ao simulador
+        Simulador simuladorLocal = this.simulador;
 
         TimerTask adicionarPessoasTask = new TimerTask() {
             @Override
             public void run() {
-                List<Pessoa> pessoasRemover = new ArrayList<>(); // Lista para armazenar pessoas a serem removidas
+                Lista<Pessoa> pessoasRemover = new Lista<>(); // Alterado para Lista<Pessoa>
 
-                for (Pessoa pessoa : pessoas) {
+                Ponteiro p = pessoas.getInicio();
+                while (p != null && p.isValido()) {
+                    Pessoa pessoa = (Pessoa) p.getElemento();
                     if (!pessoa.isChegouAoDestino() && simuladorLocal.deveAdicionarPessoa(pessoa) && !predio.pessoaJaNoSistema(pessoa)) {
                         Andar andar = getAndarPorNumero(predio, pessoa.getAndarOrigem());
                         if (andar != null) {
@@ -571,14 +526,20 @@ public class InterfaceGrafica extends JFrame {
                         }
                     }
                     if (pessoa.isChegouAoDestino()) {
-                        pessoasRemover.add(pessoa); // Adicionar à lista de remoção
+                        pessoasRemover.inserirFim(pessoa);
                     }
+                    p = p.getProximo();
                 }
 
                 // Remover as pessoas que chegaram ao destino
-                pessoas.removeAll(pessoasRemover);
+                p = pessoasRemover.getInicio();
+                while (p != null && p.isValido()) {
+                    Pessoa pessoa = (Pessoa) p.getElemento();
+                    pessoas.remover(pessoa);
+                    p = p.getProximo();
+                }
 
-                SwingUtilities.invokeLater(() -> gui.atualizar()); // Atualiza a interface gráfica
+                SwingUtilities.invokeLater(() -> gui.atualizar());
             }
         };
 
@@ -592,7 +553,6 @@ public class InterfaceGrafica extends JFrame {
         int quantidadeAndares = predio.getAndares().tamanho();
         int quantidadeElevadores = predio.getCentral().getElevadores().tamanho();
 
-        // Dimensões mínimas fixas
         int andarHeight = 50;
         int elevadorWidth = 60;
         int espacoEntreElevadores = 10;
@@ -602,55 +562,45 @@ public class InterfaceGrafica extends JFrame {
         int margemDireita = 80;
         int margemInferior = 30;
 
-        // Calculando dimensões totais do desenho
         int larguraPredio = margemEsquerda + (quantidadeElevadores * (elevadorWidth + espacoEntreElevadores)) + margemDireita - espacoEntreElevadores;
         int alturaPredio = margemSuperior + (quantidadeAndares * andarHeight) + margemInferior;
 
-        // Ajustar o tamanho do painel, se necessário
         predioPanel.setPreferredSize(new Dimension(larguraPredio, alturaPredio));
 
         int yBase = alturaPredio - margemInferior;
 
-        // Desenhando os andares
-        Ponteiro p = predio.getAndares().getInicio();
-        int andarIndex = 0;
-
-        // Desenha um fundo do prédio
         g2d.setColor(new Color(245, 245, 245));
         g2d.fillRect(0, 0, larguraPredio, alturaPredio);
         g2d.setColor(new Color(100, 100, 100));
         g2d.drawRect(0, 0, larguraPredio - 1, alturaPredio - 1);
 
-        // Loop pelos andares
+        Ponteiro p = predio.getAndares().getInicio();
+        int andarIndex = 0;
+
         while (p != null && p.isValido()) {
             Andar andar = (Andar) p.getElemento();
             int y = yBase - (andarIndex * andarHeight);
 
-            // Desenho do andar
             g2d.setColor(new Color(220, 220, 220));
             g2d.fillRect(margemEsquerda, y - andarHeight, larguraPredio - margemEsquerda - margemDireita, andarHeight);
             g2d.setColor(new Color(150, 150, 150));
             g2d.drawRect(margemEsquerda, y - andarHeight, larguraPredio - margemEsquerda - margemDireita, andarHeight);
 
-            // Linha divisória entre andares
             if (andarIndex > 0) {
                 g2d.setColor(new Color(120, 120, 120));
                 g2d.drawLine(margemEsquerda, y, larguraPredio - margemDireita, y);
             }
 
-            // Texto do andar
             g2d.setColor(Color.BLACK);
             g2d.setFont(new Font("Arial", Font.BOLD, 13));
             g2d.drawString("Andar " + andar.getNumero(), 10, y - andarHeight / 2 + 5);
 
-            // Indicação de pessoas esperando
             int pessoasAguardando = andar.getPessoasAguardando().tamanho();
             if (pessoasAguardando > 0) {
                 g2d.setColor(new Color(70, 70, 70));
                 g2d.setFont(new Font("Arial", Font.PLAIN, 12));
                 g2d.drawString(pessoasAguardando + " pessoas", margemEsquerda + 10, y - andarHeight / 2 + 5);
 
-                // Desenha pequenas figuras representando pessoas
                 g2d.setColor(new Color(80, 80, 80));
                 int xPessoa = margemEsquerda + 90;
                 int yPessoa = y - andarHeight / 2;
@@ -665,7 +615,6 @@ public class InterfaceGrafica extends JFrame {
                 }
             }
 
-            // Status do painel
             PainelElevador painel = andar.getPainel();
             int xPainel = larguraPredio - margemDireita - 120;
             int yPainel = y - andarHeight / 2;
@@ -679,13 +628,11 @@ public class InterfaceGrafica extends JFrame {
                 g2d.fillOval(xPainel + 50, yPainel - 10, 12, 12);
             } else if (painel.getTipoPainel() == TipoPainel.DOIS_BOTOES) {
                 g2d.drawString("Painel: ", xPainel, yPainel);
-                // Botão subir
                 g2d.setColor(painel.isBotaoSubirAtivado() ? Color.RED : Color.GRAY);
                 int[] xPontosSubir = {xPainel + 50, xPainel + 56, xPainel + 62};
                 int[] yPontosSubir = {yPainel - 8, yPainel - 14, yPainel - 8};
                 g2d.fillPolygon(xPontosSubir, yPontosSubir, 3);
 
-                // Botão descer
                 g2d.setColor(painel.isBotaoDescerAtivado() ? Color.RED : Color.GRAY);
                 int[] xPontosDescer = {xPainel + 50, xPainel + 56, xPainel + 62};
                 int[] yPontosDescer = {yPainel + 2, yPainel + 8, yPainel + 2};
@@ -696,7 +643,6 @@ public class InterfaceGrafica extends JFrame {
             p = p.getProximo();
         }
 
-        // Desenhando os elevadores
         Ponteiro pElevadores = predio.getCentral().getElevadores().getInicio();
         int elevadorIndex = 0;
         while (pElevadores != null && pElevadores.isValido()) {
@@ -704,18 +650,14 @@ public class InterfaceGrafica extends JFrame {
             int x = margemEsquerda + (elevadorIndex * (elevadorWidth + espacoEntreElevadores));
             int elevadorY = yBase - (elevador.getAndarAtual() * andarHeight) - andarHeight;
 
-            // Cor do elevador baseado no ID (índice de cores cíclico)
             Color corElevador = cores[elevador.getId() % cores.length];
 
-            // Desenho da caixa do elevador
             g2d.setColor(corElevador);
             g2d.fillRoundRect(x, elevadorY + 5, elevadorWidth - 10, andarHeight - 10, 10, 10);
 
-            // Borda do elevador
             g2d.setColor(corElevador.darker());
             g2d.drawRoundRect(x, elevadorY + 5, elevadorWidth - 10, andarHeight - 10, 10, 10);
 
-            // Número do elevador
             g2d.setColor(Color.WHITE);
             g2d.setFont(new Font("Arial", Font.BOLD, 14));
             String elevId = "E" + elevador.getId();
@@ -723,7 +665,6 @@ public class InterfaceGrafica extends JFrame {
             int textWidth = fm.stringWidth(elevId);
             g2d.drawString(elevId, x + (elevadorWidth - 10 - textWidth) / 2, elevadorY + andarHeight / 2 + 5);
 
-            // Quantidade de pessoas no elevador
             int pessoasNoElevador = elevador.getPessoasNoElevador().tamanho();
             if (pessoasNoElevador > 0) {
                 g2d.setColor(Color.WHITE);
@@ -732,7 +673,6 @@ public class InterfaceGrafica extends JFrame {
                 g2d.drawString(pessoasText, x + (elevadorWidth - 10) / 2 - 5, elevadorY + andarHeight - 10);
             }
 
-            // Desenho das guias do elevador (trilhos)
             g2d.setColor(new Color(200, 200, 200));
             g2d.drawLine(x - 3, margemSuperior - 5, x - 3, yBase);
             g2d.drawLine(x + elevadorWidth - 7, margemSuperior - 5, x + elevadorWidth - 7, yBase);
@@ -741,7 +681,6 @@ public class InterfaceGrafica extends JFrame {
             pElevadores = pElevadores.getProximo();
         }
 
-        // Informações gerais
         g2d.setColor(Color.BLACK);
         g2d.setFont(new Font("Arial", Font.PLAIN, 12));
         g2d.drawString("Minuto: " + simulador.getMinutoSimulado(), margemEsquerda + 10, margemSuperior - 15);
@@ -757,8 +696,8 @@ public class InterfaceGrafica extends JFrame {
         atualizarEstatisticas();
         predioPanel.repaint();
         predioScrollPane.revalidate();
-        atualizarComboBoxElevadores(); // Atualiza a ComboBox de elevadores
-        atualizarLogElevador(); // Atualiza o log do elevador
+        atualizarComboBoxElevadores();
+        atualizarLogElevador();
     }
 
     private void atualizarListaPessoas() {
@@ -774,7 +713,6 @@ public class InterfaceGrafica extends JFrame {
             Ponteiro pPessoas = andar.getPessoasAguardando().getPonteiroInicio();
             while (pPessoas != null && pPessoas.isValido()) {
                 Pessoa pessoa = (Pessoa) pPessoas.getElemento();
-                // Adiciona a condição para exibir a pessoa apenas no minuto de chegada
                 if (simulador.getMinutoSimulado() >= pessoa.getMinutoChegada()) {
                     sb.append(String.format("  P%-3d      Andar %-2d %-9s      Andar %-3d      %-12d  \n",
                             pessoa.getId(),
@@ -794,7 +732,6 @@ public class InterfaceGrafica extends JFrame {
             Ponteiro pPessoas = elevador.getPessoasNoElevador().getPonteiroInicio();
             while (pPessoas != null && pPessoas.isValido()) {
                 Pessoa pessoa = (Pessoa) pPessoas.getElemento();
-                // Adiciona a condição para exibir a pessoa apenas no minuto de chegada
                 if (simulador.getMinutoSimulado() >= pessoa.getMinutoChegada()) {
                     sb.append(String.format("  P%-3d      Elevador %-1d (A%-2d)        Andar %-3d      %-12d  \n",
                             pessoa.getId(),
@@ -808,8 +745,9 @@ public class InterfaceGrafica extends JFrame {
             pElevadores = pElevadores.getProximo();
         }
 
-        // Adicionar pessoas que já chegaram ao destino
-        for (Pessoa pessoa : pessoas) {
+        Ponteiro p = pessoas.getInicio();
+        while (p != null && p.isValido()) {
+            Pessoa pessoa = (Pessoa) p.getElemento();
             if (pessoa.isChegouAoDestino()) {
                 sb.append(String.format("  P%-3d      Andar %-2d (Destino)      Andar %-3d      %-12d  \n",
                         pessoa.getId(),
@@ -817,6 +755,7 @@ public class InterfaceGrafica extends JFrame {
                         pessoa.getAndarDestino(),
                         pessoa.getMinutoChegada()));
             }
+            p = p.getProximo();
         }
 
         pessoasTextArea.setText(sb.toString());
@@ -837,9 +776,8 @@ public class InterfaceGrafica extends JFrame {
         statsPanel.repaint();
     }
 
-    // Método para atualizar a ComboBox com os IDs dos elevadores
     private void atualizarComboBoxElevadores() {
-        Integer selectedElevadorId = (Integer) elevadorLogCombo.getSelectedItem(); // Salva o ID do elevador selecionado
+        Integer selectedElevadorId = (Integer) elevadorLogCombo.getSelectedItem();
 
         elevadorLogCombo.removeAllItems();
         if (predio != null && predio.getCentral() != null) {
@@ -852,13 +790,11 @@ public class InterfaceGrafica extends JFrame {
             }
         }
 
-        // Restaura a seleção anterior, se possível
         if (selectedElevadorId != null) {
             elevadorLogCombo.setSelectedItem(selectedElevadorId);
         }
     }
 
-    // Método para atualizar a área de texto com o log do elevador selecionado
     private void atualizarLogElevador() {
         logTextArea.setText("");
         Integer selectedElevadorId = (Integer) elevadorLogCombo.getSelectedItem();
@@ -897,7 +833,6 @@ public class InterfaceGrafica extends JFrame {
     }
 
     private void reiniciarSimulacao() {
-        // Obter parâmetros da simulação atual
         int andares = Integer.parseInt(andaresField.getText());
         int elevadores = Integer.parseInt(elevadoresField.getText());
         int capacidade = Integer.parseInt(capacidadeField.getText());
@@ -908,15 +843,12 @@ public class InterfaceGrafica extends JFrame {
         TipoPainel tipoPainel = TipoPainel.valueOf((String) painelCombo.getSelectedItem());
         int quantidadePessoas = Integer.parseInt(pessoasField.getText());
 
-        // Criar novo simulador
         simulador = new Simulador(andares, elevadores, velocidade, capacidade, tempoPico, tempoForaPico, heuristica, tipoPainel);
         simulador.setGui(this);
         predio = simulador.getPredio();
 
-        // Configurar o slider com o valor inicial
         velocidadeSlider.setValue(velocidade);
 
-        // Ajustar o tamanho preferido do predioPanel com base no número de andares e elevadores
         int minAndarHeight = 50;
         int minElevadorWidth = 60;
         int espacoEntreElevadores = 10;
@@ -929,17 +861,14 @@ public class InterfaceGrafica extends JFrame {
         int panelHeight = margemSuperior + (andares * minAndarHeight) + margemInferior;
         predioPanel.setPreferredSize(new Dimension(panelWidth, panelHeight));
 
-        // Forçar o JScrollPane a revalidar para exibir barras de rolagem, se necessário
         predioScrollPane.revalidate();
         predioScrollPane.repaint();
 
         GerenciadorSimulacao gerenciador = new GerenciadorSimulacao();
         pessoas = gerenciador.gerarListaPessoas(quantidadePessoas, andares, null);
 
-        // Adicionar as pessoas no momento correto
         agendarAdicaoDePessoas();
 
-        // Atualizar a ComboBox com os IDs dos elevadores
         atualizarComboBoxElevadores();
 
         statusLabel.setText("Simulação pronta para iniciar");
@@ -957,20 +886,17 @@ public class InterfaceGrafica extends JFrame {
         painelCombo.setSelectedIndex(0);
         pessoasField.setText("300");
 
-        // Limpar estatísticas e estado atual
         if (simulador != null) {
             simulador.getEstatisticas().zerar();
             predio.resetar();
             simulador.setMinutoSimulado(0);
         }
 
-        // Ajustar visibilidade dos botões
         restartButton.setVisible(false);
         backToConfigButton.setVisible(false);
         updateControlButtons(false);
         statusLabel.setText("Pronto para iniciar");
 
-        // Cancelar o timer de adição de pessoas
         if (adicionarPessoasTimer != null) {
             adicionarPessoasTimer.cancel();
             adicionarPessoasTimer = null;
