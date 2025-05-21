@@ -212,4 +212,16 @@ public class Elevador extends EntidadeSimulavel {
     public Predio getPredio() {
         return predio;
     }
+
+    public int getCapacidadeMaxima() {
+        return capacidadeMaxima;
+    }
+
+    public int getTempoViagemPorAndarPico() {
+        return tempoViagemPorAndarPico;
+    }
+
+    public int getTempoViagemPorAndarForaPico() {
+        return tempoViagemPorAndarForaPico;
+    }
 }

@@ -20,7 +20,7 @@ public class Simulador implements Serializable {
         this.estatisticas = new Estatisticas();
     }
 
-    public void setGui(InterfaceGrafica gui) {
+    public void setInterfaceGrafica(InterfaceGrafica gui) {
         this.gui = gui;
     }
 
@@ -44,7 +44,14 @@ public class Simulador implements Serializable {
         return velocidadeEmMs;
     }
 
-    // Novo método para obter o tempo atual da simulação em milissegundos
+    public void setVelocidadeSimulacao(int novaVelocidade) {
+        this.velocidadeEmMs = novaVelocidade;
+        if (emExecucao && timer != null) {
+            timer.cancel();
+            iniciarTimer();
+        }
+    }
+
     public long getTempoSimulacaoEmMs() {
         return (long) minutoSimulado * velocidadeEmMs;
     }
@@ -79,9 +86,9 @@ public class Simulador implements Serializable {
         if (gui != null) {
             SwingUtilities.invokeLater(() -> {
                 JOptionPane.showMessageDialog(gui, "Simulação finalizada! Todas as pessoas chegaram aos seus destinos.");
-                gui.restartButton.setVisible(true); // Tornar o botão de reiniciar visível
-                gui.backToConfigButton.setVisible(true); // Mostrar o botão de voltar
-                gui.updateControlButtons(false); // Desativar botões de pausa e continuar
+                gui.restartButton.setVisible(true);
+                gui.backToConfigButton.setVisible(true);
+                gui.updateControlButtons(false);
             });
         }
     }
@@ -99,12 +106,10 @@ public class Simulador implements Serializable {
         }, 0, velocidadeEmMs);
     }
 
-    public void setVelocidadeEmMsInterno(int novaVelocidade) {
-        this.velocidadeEmMs = novaVelocidade;
-    }
-
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         in.defaultReadObject();
+        this.gui = null;
+        this.timer = null;
     }
 
     public void gravar(String nomeArquivo) {
@@ -132,7 +137,6 @@ public class Simulador implements Serializable {
     }
 
     public boolean todasPessoasChegaram() {
-        // Verificar se todas as pessoas já chegaram ao destino
         if (gui != null && gui.pessoas != null) {
             Ponteiro p = gui.pessoas.getInicio();
             while (p != null && p.isValido()) {
@@ -143,8 +147,6 @@ public class Simulador implements Serializable {
                 p = p.getProximo();
             }
         }
-
-        // Se não houver pessoas ou todas já chegaram, retornar true
         return true;
     }
 

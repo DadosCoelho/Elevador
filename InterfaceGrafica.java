@@ -4,6 +4,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.io.*;
+import javax.swing.filechooser.FileFilter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 public class InterfaceGrafica extends JFrame {
     private Predio predio;
@@ -307,84 +314,240 @@ public class InterfaceGrafica extends JFrame {
         restartButton = criarBotao("Reiniciar Simulação", new Color(240, 240, 240));
         restartButton.setForeground(new Color(60, 130, 200));
         restartButton.setVisible(false);
-        restartButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int resposta = JOptionPane.showConfirmDialog(InterfaceGrafica.this,
-                        "Deseja realmente reiniciar a simulação?",
-                        "Reiniciar Simulação",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE);
-                if (resposta == JOptionPane.YES_OPTION) {
-                    reiniciarSimulacao();
-                    pauseButton.setVisible(false);
-                    continueButton.setText("Iniciar");
-                    continueButton.setVisible(true);
-                    restartButton.setVisible(false);
-                    backToConfigButton.setVisible(false);
-                    updateControlButtons(false);
-                    velocidadeLabel.setVisible(false);
-                    velocidadeSlider.setVisible(false);
-                }
+        restartButton.addActionListener(e -> {
+            int resposta = JOptionPane.showConfirmDialog(InterfaceGrafica.this,
+                    "Deseja realmente reiniciar a simulação?",
+                    "Reiniciar Simulação",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+            if (resposta == JOptionPane.YES_OPTION) {
+                reiniciarSimulacao();
+                pauseButton.setVisible(false);
+                continueButton.setText("Iniciar");
+                continueButton.setVisible(true);
+                restartButton.setVisible(false);
+                backToConfigButton.setVisible(false);
+                updateControlButtons(false);
+                velocidadeLabel.setVisible(false);
+                velocidadeSlider.setVisible(false);
             }
         });
 
         backToConfigButton = criarBotao("Voltar para Configuração", new Color(240, 240, 240));
         backToConfigButton.setForeground(new Color(60, 130, 200));
         backToConfigButton.setVisible(false);
-        backToConfigButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int resposta = JOptionPane.showConfirmDialog(InterfaceGrafica.this,
-                        "Deseja realmente voltar para a configuração? A simulação atual será perdida.",
-                        "Voltar para Configuração",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.QUESTION_MESSAGE);
-                if (resposta == JOptionPane.YES_OPTION) {
-                    cardLayout.show(mainPanel, "Config");
-                    reiniciarConfiguracao();
-                    pauseButton.setVisible(false);
-                    continueButton.setText("Iniciar");
-                    continueButton.setVisible(true);
-                    restartButton.setVisible(false);
-                    backToConfigButton.setVisible(false);
-                    updateControlButtons(false);
-                    velocidadeLabel.setVisible(false);
-                    velocidadeSlider.setVisible(false);
+        backToConfigButton.addActionListener(e -> {
+            int resposta = JOptionPane.showConfirmDialog(InterfaceGrafica.this,
+                    "Deseja realmente voltar para a configuração? A simulação atual será perdida.",
+                    "Voltar para Configuração",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+            if (resposta == JOptionPane.YES_OPTION) {
+                if (simulador != null) {
+                    simulador.pausar();
+                    adicionarPessoasTimer.cancel();
+                }
+                cardLayout.show(mainPanel, "Config");
+                pauseButton.setVisible(false);
+                continueButton.setText("Iniciar");
+                continueButton.setVisible(true);
+                restartButton.setVisible(false);
+                backToConfigButton.setVisible(false);
+                updateControlButtons(false);
+                velocidadeLabel.setVisible(false);
+                velocidadeSlider.setVisible(false);
+            }
+        });
+
+        JButton saveButton = criarBotao("Salvar Simulação", new Color(240, 240, 240));
+        saveButton.setForeground(new Color(60, 130, 200));
+        saveButton.setVisible(true);
+        saveButton.addActionListener(e -> salvarSimulacao());
+
+        JButton loadButton = criarBotao("Carregar Simulação", new Color(240, 240, 240));
+        loadButton.setForeground(new Color(60, 130, 200));
+        loadButton.setVisible(true);
+        loadButton.addActionListener(e -> carregarSimulacao());
+
+        panel.add(continueButton);
+        panel.add(pauseButton);
+        panel.add(restartButton);
+        panel.add(backToConfigButton);
+        panel.add(saveButton);
+        panel.add(loadButton);
+
+        velocidadeLabel = new JLabel("Velocidade:");
+        velocidadeSlider = new JSlider(JSlider.HORIZONTAL, 100, 2000, 1000);
+        velocidadeSlider.setMajorTickSpacing(400);
+        velocidadeSlider.setMinorTickSpacing(100);
+        velocidadeSlider.setPaintTicks(true);
+        velocidadeSlider.addChangeListener(e -> {
+            if (!velocidadeSlider.getValueIsAdjusting()) {
+                if (simulador != null) {
+                    simulador.setVelocidadeSimulacao(velocidadeSlider.getValue());
                 }
             }
         });
 
-        velocidadeLabel = new JLabel("Velocidade: ");
-        velocidadeSlider = new JSlider(JSlider.HORIZONTAL, 100, 2000, 1000);
-        velocidadeSlider.setInverted(true);
-        velocidadeSlider.setPreferredSize(new Dimension(150, 30));
-        velocidadeSlider.addChangeListener(e -> {
-            if (simulador != null && !velocidadeSlider.getValueIsAdjusting()) {
-                int novaVelocidade = velocidadeSlider.getValue();
-                simulador.pausar();
-                simulador.setVelocidadeEmMsInterno(novaVelocidade);
-                simulador.continuar();
-            }
-        });
-
-        velocidadeLabel.setVisible(false);
-        velocidadeSlider.setVisible(false);
-
-        statusLabel = new JLabel("Pronto para iniciar");
-        statusLabel.setFont(new Font("Arial", Font.ITALIC, 12));
-
-        panel.add(pauseButton);
-        panel.add(continueButton);
-        panel.add(restartButton);
-        panel.add(backToConfigButton);
-        panel.add(new JSeparator(JSeparator.VERTICAL));
         panel.add(velocidadeLabel);
         panel.add(velocidadeSlider);
-        panel.add(new JSeparator(JSeparator.VERTICAL));
+
+        statusLabel = new JLabel("Simulação: Parada");
+        statusLabel.setFont(new Font("Arial", Font.BOLD, 12));
         panel.add(statusLabel);
 
         return panel;
+    }
+
+    public void salvarSimulacao() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File("simSalvos"));
+        fileChooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() || f.getName().endsWith(".sim");
+            }
+            @Override
+            public String getDescription() {
+                return "Arquivos de Simulação (*.sim)";
+            }
+        });
+
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            if (!file.getName().endsWith(".sim")) {
+                file = new File(file.getAbsolutePath() + ".sim");
+            }
+            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
+                SimulationState state = new SimulationState(
+                        predio,
+                        simulador,
+                        pessoas,
+                        heuristicaCombo.getSelectedIndex() + 1, // 1, 2 ou 3
+                        TipoPainel.valueOf((String) painelCombo.getSelectedItem())
+                );
+                oos.writeObject(state);
+                JOptionPane.showMessageDialog(this, "Simulação salva com sucesso!",
+                        "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Erro ao salvar simulação: " + e.getMessage(),
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    public void carregarSimulacao() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File("simSalvos"));
+        fileChooser.setFileFilter(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return f.isDirectory() || f.getName().endsWith(".sim");
+            }
+            @Override
+            public String getDescription() {
+                return "Arquivos de Simulação (*.sim)";
+            }
+        });
+
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+                SimulationState state = (SimulationState) ois.readObject();
+                predio = state.getPredio();
+                simulador = state.getSimulador();
+                pessoas = state.getPessoas();
+
+                // Atualizar os campos da interface gráfica
+                atualizarCamposInterface(state);
+                atualizarEstatisticas();
+                atualizarLogElevador();
+
+                // Exibir o painel de simulação
+                cardLayout.show(mainPanel, "Simulation");
+                predioPanel.repaint();
+            } catch (IOException | ClassNotFoundException e) {
+                JOptionPane.showMessageDialog(this, "Erro ao carregar simulação: " + e.getMessage(),
+                        "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void atualizarCamposInterface(SimulationState state) {
+        // Atualizar o combo de heurística
+        int heuristica = state.getHeuristica();
+        String heuristicaText = switch (heuristica) {
+            case 1 -> "1 - Ordem de Chegada";
+            case 2 -> "2 - Otimização de Tempo";
+            case 3 -> "3 - Otimização de Energia";
+            default -> "1 - Ordem de Chegada";
+        };
+        heuristicaCombo.setSelectedItem(heuristicaText);
+
+        // Atualizar o combo de tipo de painel
+        String tipoPainel = state.getTipoPainel().toString();
+        painelCombo.setSelectedItem(tipoPainel);
+
+        // Atualizar o número de andares, elevadores, etc.
+        andaresField.setText(String.valueOf(predio.getAndares().tamanho()));
+        elevadoresField.setText(String.valueOf(predio.getCentral().getElevadores().tamanho()));
+        capacidadeField.setText(String.valueOf(((Elevador) predio.getCentral().getElevadores().getInicio().getElemento()).getCapacidadeMaxima()));
+        tempoPicoField.setText(String.valueOf(((Elevador) predio.getCentral().getElevadores().getInicio().getElemento()).getTempoViagemPorAndarPico()));
+        tempoForaPicoField.setText(String.valueOf(((Elevador) predio.getCentral().getElevadores().getInicio().getElemento()).getTempoViagemPorAndarForaPico()));
+        pessoasField.setText(String.valueOf(pessoas.tamanho()));
+
+        // Atualizar o combo de elevadores para logs
+        elevadorLogCombo.removeAllItems();
+        Ponteiro p = predio.getCentral().getElevadores().getInicio();
+        while (p != null && p.isValido()) {
+            Elevador elevador = (Elevador) p.getElemento();
+            elevadorLogCombo.addItem(elevador.getId());
+            p = p.getProximo();
+        }
+    }
+
+    private void atualizarInterface() {
+        predioPanel.repaint();
+        atualizarEstatisticas();
+        atualizarListaPessoas();
+        statusLabel.setText("Simulação: Pausada");
+        pauseButton.setVisible(false);
+        continueButton.setText("Continuar");
+        continueButton.setVisible(true);
+        restartButton.setVisible(true);
+        backToConfigButton.setVisible(true);
+        velocidadeLabel.setVisible(true);
+        velocidadeSlider.setVisible(true);
+        updateControlButtons(false);
+    }
+
+    private void adicionarPessoas() {
+        if (simulador == null || pessoas == null) return;
+
+        Ponteiro p = pessoas.getInicio();
+        while (p != null && p.isValido()) {
+            Pessoa pessoa = (Pessoa) p.getElemento();
+            if (simulador.deveAdicionarPessoa(pessoa) && !pessoa.isChegouAoDestino()) {
+                Lista<Andar> andares = predio.getAndares();
+                Andar andarOrigem = null;
+                Ponteiro andarPtr = andares.getInicio();
+                while (andarPtr != null && andarPtr.isValido()) {
+                    Andar andar = (Andar) andarPtr.getElemento();
+                    if (andar.getNumero() == pessoa.getAndarOrigem()) {
+                        andarOrigem = andar;
+                        break;
+                    }
+                    andarPtr = andarPtr.getProximo();
+                }
+                if (andarOrigem != null) {
+                    andarOrigem.adicionarPessoa(pessoa);
+                }
+            }
+            p = p.getProximo();
+        }
+        atualizarListaPessoas();
     }
 
     private JButton criarBotao(String texto, Color corFundo) {
@@ -470,7 +633,7 @@ public class InterfaceGrafica extends JFrame {
         int quantidadePessoas = Integer.parseInt(pessoasField.getText());
 
         simulador = new Simulador(andares, elevadores, velocidade, capacidade, tempoPico, tempoForaPico, heuristica, tipoPainel);
-        simulador.setGui(this);
+        simulador.setInterfaceGrafica(this);
         predio = simulador.getPredio();
 
         velocidadeSlider.setValue(velocidade);
@@ -764,14 +927,17 @@ public class InterfaceGrafica extends JFrame {
     private void atualizarEstatisticas() {
         statsPanel.removeAll();
         Estatisticas stats = simulador.getEstatisticas();
-        statsPanel.add(new JLabel("Tempo Médio Espera: " + String.format("%.2f", stats.getTempoMedioEspera()) + " min"));
-        statsPanel.add(new JLabel("Energia Consumida: " + String.format("%.2f", stats.getEnergiaConsumida()) + " un"));
-        statsPanel.add(new JLabel("Pessoas Transportadas: " + stats.getTotalPessoasTransportadas()));
-        statsPanel.add(new JLabel("Minuto Simulado: " + simulador.getMinutoSimulado()));
-        String[] tipoPainel = {"Único Botão", "Dois Botões", "Painel Numérico"};
-        statsPanel.add(new JLabel("Tipo Painel: " + tipoPainel[painelCombo.getSelectedIndex()]));
-        String[] heuristicas = {"1 - Ordem de Chegada", "2 - Otimização de Tempo", "3 - Otimização de Energia"};
-        statsPanel.add(new JLabel("Modelo: " + heuristicas[heuristicaCombo.getSelectedIndex()]));
+
+        JLabel tempoMedioLabel = new JLabel("Tempo Médio de Espera: " + String.format("%.2f", stats.getTempoMedioEspera()) + " min");
+        JLabel chamadasAtendidasLabel = new JLabel("Chamadas Atendidas: " + stats.getChamadasAtendidas());
+        JLabel energiaConsumidaLabel = new JLabel("Energia Consumida: " + String.format("%.2f", stats.getEnergiaConsumida()));
+        JLabel pessoasTransportadasLabel = new JLabel("Pessoas Transportadas: " + stats.getTotalPessoasTransportadas());
+
+        statsPanel.add(tempoMedioLabel);
+        statsPanel.add(chamadasAtendidasLabel);
+        statsPanel.add(energiaConsumidaLabel);
+        statsPanel.add(pessoasTransportadasLabel);
+
         statsPanel.revalidate();
         statsPanel.repaint();
     }
@@ -844,7 +1010,7 @@ public class InterfaceGrafica extends JFrame {
         int quantidadePessoas = Integer.parseInt(pessoasField.getText());
 
         simulador = new Simulador(andares, elevadores, velocidade, capacidade, tempoPico, tempoForaPico, heuristica, tipoPainel);
-        simulador.setGui(this);
+        simulador.setInterfaceGrafica(this);
         predio = simulador.getPredio();
 
         velocidadeSlider.setValue(velocidade);
