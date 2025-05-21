@@ -1,16 +1,11 @@
-import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.io.*;
+import javax.swing.*;
+import javax.swing.border.*;
 import javax.swing.filechooser.FileFilter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 public class InterfaceGrafica extends JFrame {
     private Predio predio;
@@ -254,8 +249,15 @@ public class InterfaceGrafica extends JFrame {
             }
         });
 
+        JButton loadButton = criarBotao("Carregar Simulação", new Color(240, 240, 240));
+        loadButton.setForeground(new Color(60, 130, 200));
+        loadButton.setVisible(true);
+        loadButton.addActionListener(e -> carregarSimulacao());
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 20));
         buttonPanel.add(startButton);
+        buttonPanel.add(Box.createHorizontalStrut(30)); // Espaço de 30 pixels entre os botões
+        buttonPanel.add(loadButton);
 
         panel.add(titleLabel, BorderLayout.NORTH);
         panel.add(fieldsPanel, BorderLayout.CENTER);
@@ -364,17 +366,11 @@ public class InterfaceGrafica extends JFrame {
         saveButton.setVisible(true);
         saveButton.addActionListener(e -> salvarSimulacao());
 
-        JButton loadButton = criarBotao("Carregar Simulação", new Color(240, 240, 240));
-        loadButton.setForeground(new Color(60, 130, 200));
-        loadButton.setVisible(true);
-        loadButton.addActionListener(e -> carregarSimulacao());
-
         panel.add(continueButton);
         panel.add(pauseButton);
         panel.add(restartButton);
         panel.add(backToConfigButton);
         panel.add(saveButton);
-        panel.add(loadButton);
 
         velocidadeLabel = new JLabel("Velocidade:");
         velocidadeSlider = new JSlider(JSlider.HORIZONTAL, 100, 2000, 2000); 
