@@ -377,14 +377,18 @@ public class InterfaceGrafica extends JFrame {
         panel.add(loadButton);
 
         velocidadeLabel = new JLabel("Velocidade:");
-        velocidadeSlider = new JSlider(JSlider.HORIZONTAL, 100, 2000, 1000);
-        velocidadeSlider.setMajorTickSpacing(400);
+        velocidadeSlider = new JSlider(JSlider.HORIZONTAL, 100, 2000, 2000); 
+        velocidadeSlider.setMajorTickSpacing(400); 
         velocidadeSlider.setMinorTickSpacing(100);
         velocidadeSlider.setPaintTicks(true);
-        velocidadeSlider.addChangeListener(e -> {
-            if (!velocidadeSlider.getValueIsAdjusting()) {
-                if (simulador != null) {
-                    simulador.setVelocidadeSimulacao(velocidadeSlider.getValue());
+        velocidadeSlider.addChangeListener(e -> { 
+            if (!velocidadeSlider.getValueIsAdjusting()) { 
+                if (simulador != null) { 
+                    int min = velocidadeSlider.getMinimum();
+                    int max = velocidadeSlider.getMaximum();
+                    int valorSlider = velocidadeSlider.getValue();
+                    int valorInvertido = max + min - valorSlider;
+                    simulador.setVelocidadeSimulacao(valorInvertido);
                 }
             }
         });
