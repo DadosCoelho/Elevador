@@ -38,6 +38,8 @@ public class InterfaceGrafica extends JFrame {
     private JComboBox<String> heuristicaCombo;
     private JComboBox<String> painelCombo;
     private JTextField pessoasField;
+    private JSpinner prioridadeSpinner;
+    private JSpinner minutoChegadaSpinner;
 
     // Controle de simulação
     private JButton pauseButton;
@@ -237,6 +239,26 @@ public class InterfaceGrafica extends JFrame {
             }
             row++;
         }
+
+        JLabel prioridadeLabel = new JLabel("Prioridade (%):");
+        prioridadeSpinner = new JSpinner(new SpinnerNumberModel(50, 0, 100, 1)); // padrão 50%
+
+        JLabel minutoChegadaLabel = new JLabel("Minuto máx. chegada:");
+        minutoChegadaSpinner = new JSpinner(new SpinnerNumberModel(60, 1, 1440, 1)); // padrão 60, até 24h
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        fieldsPanel.add(prioridadeLabel, gbc);
+        gbc.gridx = 1;
+        fieldsPanel.add(prioridadeSpinner, gbc);
+        row++;
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        fieldsPanel.add(minutoChegadaLabel, gbc);
+        gbc.gridx = 1;
+        fieldsPanel.add(minutoChegadaSpinner, gbc);
+        row++;
 
         JButton startButton = criarBotao("Iniciar Simulação", new Color(60, 130, 200));
         startButton.setForeground(new Color(60, 130, 200));
@@ -631,7 +653,14 @@ public class InterfaceGrafica extends JFrame {
         predioScrollPane.repaint();
 
         GerenciadorSimulacao gerenciador = new GerenciadorSimulacao();
-        pessoas = gerenciador.gerarListaPessoas(quantidadePessoas, andares, null);
+        double percentualPrioridade = prioridadeSpinner.getValue() != null ? (Integer) prioridadeSpinner.getValue() : 50;
+        int minutoMaxChegada = minutoChegadaSpinner.getValue() != null ? (Integer) minutoChegadaSpinner.getValue() : 60;
+        pessoas = gerenciador.gerarListaPessoas(
+            quantidadePessoas,
+            andares,
+            (int) percentualPrioridade,
+            minutoMaxChegada
+        );
 
         agendarAdicaoDePessoas();
 
@@ -1013,7 +1042,14 @@ public class InterfaceGrafica extends JFrame {
         predioScrollPane.repaint();
 
         GerenciadorSimulacao gerenciador = new GerenciadorSimulacao();
-        pessoas = gerenciador.gerarListaPessoas(quantidadePessoas, andares, null);
+        double percentualPrioridade = prioridadeSpinner.getValue() != null ? (Integer) prioridadeSpinner.getValue() : 50;
+        int minutoMaxChegada = minutoChegadaSpinner.getValue() != null ? (Integer) minutoChegadaSpinner.getValue() : 60;
+        pessoas = gerenciador.gerarListaPessoas(
+            quantidadePessoas,
+            andares,
+            (int) percentualPrioridade,
+            minutoMaxChegada
+        );
 
         agendarAdicaoDePessoas();
 
