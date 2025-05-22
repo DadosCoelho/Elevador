@@ -954,10 +954,18 @@ public class InterfaceGrafica extends JFrame {
         JLabel energiaConsumidaLabel = new JLabel("Energia Consumida: " + String.format("%.2f", stats.getEnergiaConsumida()));
         JLabel pessoasTransportadasLabel = new JLabel("Pessoas Transportadas: " + stats.getTotalPessoasTransportadas());
 
+        // Adicione heurística e tipo de painel
+        String heuristicaText = (String) heuristicaCombo.getSelectedItem();
+        String tipoPainelText = (String) painelCombo.getSelectedItem();
+        JLabel heuristicaLabel = new JLabel("Heurística: " + heuristicaText);
+        JLabel tipoPainelLabel = new JLabel("Tipo de Painel: " + tipoPainelText);
+
         statsPanel.add(tempoMedioLabel);
         statsPanel.add(chamadasAtendidasLabel);
         statsPanel.add(energiaConsumidaLabel);
         statsPanel.add(pessoasTransportadasLabel);
+        statsPanel.add(heuristicaLabel);
+        statsPanel.add(tipoPainelLabel);
 
         statsPanel.revalidate();
         statsPanel.repaint();
