@@ -50,7 +50,7 @@ public class InterfaceGrafica extends JFrame {
     private JLabel velocidadeLabel;
 
     private Timer adicionarPessoasTimer;
-    public Lista<Pessoa> pessoas; // Alterado de List<Pessoa> para Lista<Pessoa>
+    public Lista<Pessoa> pessoas;
 
     private JComboBox<Integer> elevadorLogCombo;
     private JTextArea logTextArea;
@@ -190,9 +190,9 @@ public class InterfaceGrafica extends JFrame {
                 "Quantidade de Pessoas:"
         };
 
-        andaresField = new JTextField("12", 10);
-        elevadoresField = new JTextField("13", 10);
-        capacidadeField = new JTextField("5", 10);
+        andaresField = new JTextField("11", 10);
+        elevadoresField = new JTextField("12", 10);
+        capacidadeField = new JTextField("8", 10);
         velocidadeField = new JTextField("1000", 10);
         tempoPicoField = new JTextField("2", 10);
         tempoForaPicoField = new JTextField("1", 10);
@@ -257,7 +257,7 @@ public class InterfaceGrafica extends JFrame {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 20));
         buttonPanel.add(startButton);
-        buttonPanel.add(Box.createHorizontalStrut(30)); // Espaço de 30 pixels entre os botões
+        buttonPanel.add(Box.createHorizontalStrut(30));
         buttonPanel.add(loadButton);
 
         panel.add(titleLabel, BorderLayout.NORTH);
@@ -374,7 +374,7 @@ public class InterfaceGrafica extends JFrame {
         panel.add(saveButton);
 
         velocidadeLabel = new JLabel("Velocidade:");
-        velocidadeSlider = new JSlider(JSlider.HORIZONTAL, 100, 2000, 2000); 
+        velocidadeSlider = new JSlider(JSlider.HORIZONTAL, 100, 2000, 1000); 
         velocidadeSlider.setMajorTickSpacing(400); 
         velocidadeSlider.setMinorTickSpacing(100);
         velocidadeSlider.setPaintTicks(true);
@@ -425,7 +425,7 @@ public class InterfaceGrafica extends JFrame {
                         predio,
                         simulador,
                         pessoas,
-                        heuristicaCombo.getSelectedIndex() + 1, // 1, 2 ou 3
+                        heuristicaCombo.getSelectedIndex() + 1,
                         TipoPainel.valueOf((String) painelCombo.getSelectedItem())
                 );
                 oos.writeObject(state);
@@ -470,7 +470,6 @@ public class InterfaceGrafica extends JFrame {
                 cardLayout.show(mainPanel, "Simulation");
                 predioPanel.repaint();
 
-                // --- ADICIONE AQUI ---
                 // Pausar o simulador e preparar para iniciar
                 simulador.setInterfaceGrafica(this);
                 simulador.pausar();
@@ -487,7 +486,6 @@ public class InterfaceGrafica extends JFrame {
                 velocidadeLabel.setVisible(false);
                 velocidadeSlider.setVisible(false);
                 statusLabel.setText("Simulação pronta para iniciar");
-                // --- FIM DA ADIÇÃO ---
             } catch (IOException | ClassNotFoundException e) {
                 JOptionPane.showMessageDialog(this, "Erro ao carregar simulação: " + e.getMessage(),
                         "Erro", JOptionPane.ERROR_MESSAGE);
@@ -526,48 +524,6 @@ public class InterfaceGrafica extends JFrame {
             elevadorLogCombo.addItem(elevador.getId());
             p = p.getProximo();
         }
-    }
-
-    private void atualizarInterface() {
-        predioPanel.repaint();
-        atualizarEstatisticas();
-        atualizarListaPessoas();
-        statusLabel.setText("Simulação: Pausada");
-        pauseButton.setVisible(false);
-        continueButton.setText("Continuar");
-        continueButton.setVisible(true);
-        restartButton.setVisible(true);
-        backToConfigButton.setVisible(true);
-        velocidadeLabel.setVisible(true);
-        velocidadeSlider.setVisible(true);
-        updateControlButtons(false);
-    }
-
-    private void adicionarPessoas() {
-        if (simulador == null || pessoas == null) return;
-
-        Ponteiro p = pessoas.getInicio();
-        while (p != null && p.isValido()) {
-            Pessoa pessoa = (Pessoa) p.getElemento();
-            if (simulador.deveAdicionarPessoa(pessoa) && !pessoa.isChegouAoDestino()) {
-                Lista<Andar> andares = predio.getAndares();
-                Andar andarOrigem = null;
-                Ponteiro andarPtr = andares.getInicio();
-                while (andarPtr != null && andarPtr.isValido()) {
-                    Andar andar = (Andar) andarPtr.getElemento();
-                    if (andar.getNumero() == pessoa.getAndarOrigem()) {
-                        andarOrigem = andar;
-                        break;
-                    }
-                    andarPtr = andarPtr.getProximo();
-                }
-                if (andarOrigem != null) {
-                    andarOrigem.adicionarPessoa(pessoa);
-                }
-            }
-            p = p.getProximo();
-        }
-        atualizarListaPessoas();
     }
 
     private JButton criarBotao(String texto, Color corFundo) {
@@ -697,7 +653,7 @@ public class InterfaceGrafica extends JFrame {
         TimerTask adicionarPessoasTask = new TimerTask() {
             @Override
             public void run() {
-                Lista<Pessoa> pessoasRemover = new Lista<>(); // Alterado para Lista<Pessoa>
+                Lista<Pessoa> pessoasRemover = new Lista<>();
 
                 Ponteiro p = pessoas.getInicio();
                 while (p != null && p.isValido()) {
@@ -715,7 +671,6 @@ public class InterfaceGrafica extends JFrame {
                     p = p.getProximo();
                 }
 
-                // Remover as pessoas que chegaram ao destino
                 p = pessoasRemover.getInicio();
                 while (p != null && p.isValido()) {
                     Pessoa pessoa = (Pessoa) p.getElemento();
@@ -953,8 +908,6 @@ public class InterfaceGrafica extends JFrame {
         JLabel chamadasAtendidasLabel = new JLabel("Chamadas Atendidas: " + stats.getChamadasAtendidas());
         JLabel energiaConsumidaLabel = new JLabel("Energia Consumida: " + String.format("%.2f", stats.getEnergiaConsumida()));
         JLabel pessoasTransportadasLabel = new JLabel("Pessoas Transportadas: " + stats.getTotalPessoasTransportadas());
-
-        // Adicione heurística e tipo de painel
         String heuristicaText = (String) heuristicaCombo.getSelectedItem();
         String tipoPainelText = (String) painelCombo.getSelectedItem();
         JLabel heuristicaLabel = new JLabel("Heurística: " + heuristicaText);
@@ -1070,31 +1023,7 @@ public class InterfaceGrafica extends JFrame {
         simulador.pausar();
     }
 
-    private void reiniciarConfiguracao() {
-        andaresField.setText("10");
-        elevadoresField.setText("13");
-        capacidadeField.setText("8");
-        velocidadeField.setText("1000");
-        tempoPicoField.setText("2");
-        tempoForaPicoField.setText("1");
-        heuristicaCombo.setSelectedIndex(0);
-        painelCombo.setSelectedIndex(0);
-        pessoasField.setText("300");
-
-        if (simulador != null) {
-            simulador.getEstatisticas().zerar();
-            predio.resetar();
-            simulador.setMinutoSimulado(0);
-        }
-
-        restartButton.setVisible(false);
-        backToConfigButton.setVisible(false);
-        updateControlButtons(false);
-        statusLabel.setText("Pronto para iniciar");
-
-        if (adicionarPessoasTimer != null) {
-            adicionarPessoasTimer.cancel();
-            adicionarPessoasTimer = null;
-        }
+    public void resetarVelocidadeSlider() {
+        velocidadeSlider.setValue(1000);
     }
 }
