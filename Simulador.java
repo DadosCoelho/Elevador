@@ -1,4 +1,6 @@
 import java.io.*;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -9,12 +11,17 @@ public class Simulador implements Serializable {
     private boolean emExecucao;
     private Predio predio;
     private Estatisticas estatisticas;
+    private transient InterfaceGrafica gui;
 
     public Simulador(int andares, int elevadores, int velocidadeEmMs, int capacidadeMaxima, int tempoViagemPorAndarPico, int tempoViagemPorAndarForaPico, int heuristica, TipoPainel tipoPainel) {
         this.minutoSimulado = 0;
         this.velocidadeEmMs = velocidadeEmMs;
         this.predio = new Predio(andares, elevadores, capacidadeMaxima, tempoViagemPorAndarPico, tempoViagemPorAndarForaPico, heuristica, tipoPainel, this);
         this.estatisticas = new Estatisticas();
+    }
+
+    public void setInterfaceGrafica(InterfaceGrafica gui) {
+        this.gui = gui;
     }
 
     public Estatisticas getEstatisticas() {
@@ -25,8 +32,28 @@ public class Simulador implements Serializable {
         return predio;
     }
 
-    public int getMinutoSimulado() { // Novo método
+    public int getMinutoSimulado() {
         return minutoSimulado;
+    }
+
+    public void setMinutoSimulado(int minutoSimulado) {
+        this.minutoSimulado = minutoSimulado;
+    }
+
+    public int getVelocidadeEmMs() {
+        return velocidadeEmMs;
+    }
+
+    public void setVelocidadeSimulacao(int novaVelocidade) {
+        this.velocidadeEmMs = novaVelocidade;
+        if (emExecucao && timer != null) {
+            timer.cancel();
+            iniciarTimer();
+        }
+    }
+
+    public long getTempoSimulacaoEmMs() {
+        return (long) minutoSimulado * velocidadeEmMs;
     }
 
     public void iniciar() {
@@ -40,7 +67,11 @@ public class Simulador implements Serializable {
         if (timer != null) {
             timer.cancel();
             emExecucao = false;
+            setVelocidadeSimulacao(1000);
             System.out.println("Simulação pausada.");
+            if (gui != null) {
+                SwingUtilities.invokeLater(() -> gui.resetarVelocidadeSlider());
+            }
         }
     }
 
@@ -56,6 +87,14 @@ public class Simulador implements Serializable {
         if (timer != null) timer.cancel();
         emExecucao = false;
         System.out.println("Simulação encerrada.");
+        if (gui != null) {
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(gui, "Simulação finalizada! Todas as pessoas chegaram aos seus destinos.");
+                gui.restartButton.setVisible(true);
+                gui.backToConfigButton.setVisible(true);
+                gui.updateControlButtons(false);
+            });
+        }
     }
 
     private void iniciarTimer() {
@@ -63,8 +102,18 @@ public class Simulador implements Serializable {
         timer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 predio.atualizar(minutoSimulado++);
+                if (todasPessoasChegaram()) {
+                    encerrar();
+                }
+                atualizarInterface();
             }
         }, 0, velocidadeEmMs);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        this.gui = null;
+        this.timer = null;
     }
 
     public void gravar(String nomeArquivo) {
@@ -87,7 +136,31 @@ public class Simulador implements Serializable {
     }
 
     public boolean isHorarioPico() {
-        int horaSimulada = minutoSimulado / 60; // Converte minutos em horas
+        int horaSimulada = minutoSimulado / 60;
         return (horaSimulada >= 8 && horaSimulada < 10) || (horaSimulada >= 17 && horaSimulada < 19);
+    }
+
+    public boolean todasPessoasChegaram() {
+        if (gui != null && gui.pessoas != null) {
+            Ponteiro p = gui.pessoas.getInicio();
+            while (p != null && p.isValido()) {
+                Pessoa pessoa = (Pessoa) p.getElemento();
+                if (!pessoa.isChegouAoDestino()) {
+                    return false;
+                }
+                p = p.getProximo();
+            }
+        }
+        return true;
+    }
+
+    public void atualizarInterface() {
+        if (gui != null) {
+            SwingUtilities.invokeLater(() -> gui.atualizar());
+        }
+    }
+
+    public boolean deveAdicionarPessoa(Pessoa pessoa) {
+        return minutoSimulado >= pessoa.getMinutoChegada();
     }
 }

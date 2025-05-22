@@ -1,7 +1,7 @@
 import java.io.Serializable;
 
-public interface NoGenerico extends Serializable {
-    Object getElemento();
-    NoGenerico getProximo();
-    void setProximo(NoGenerico proximo);
+public interface NoGenerico<T> extends Serializable {
+    T getElemento();
+    NoGenerico<T> getProximo();
+    void setProximo(NoGenerico<T> proximo);
 }

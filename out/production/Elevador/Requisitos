@@ -1,0 +1,105 @@
+Simulador de Elevador Inteligente
+
+Controle Centralizado de Elevadores
+
+Trabalho Final de Estruturas de Dados
+
+ Resumo
+ Este trabalho propõe o desenvolvimento de um simulador para o funcionamento de elevadores inteligentes
+ em um prédio, onde uma central de controle gerencia de 1 a N elevadores em um edifício com 5 a X andares.
+ A simulação considera diversas variáveis, como tempos de viagem, filas de espera em cada andar, tempos de
+ espera dos usuários, prioridades para pessoas cadeirantes e idosas, e capacidade dos elevadores. Além disso, o
+ modelo permite a configuração de diferentes tipos de painéis externos e internos, e a escolha de heurísticas de
+ funcionamento para otimização do tempo de espera ou do consumo de energia.
+
+ I. INTRODUÇÃO
+ A mobilidade interna em edifícios de múltiplos andares exige sistemas de controle de elevadores que
+ sejam eficientes e capazes de atender a diversas demandas, incluindo a prioridade para usuários com
+ necessidades especiais. Este projeto visa simular o funcionamento de um sistema de elevadores inteligentes,
+ permitindo a análise de diferentes estratégias de controle e o estudo de parâmetros como tempo de espera,
+ consumo de energia e fluxo de pessoas.
+
+ II. CONTEXTUALIZAÇÃO
+ O simulador modela um prédio com número configurável de andares (mínimo 5) e uma frota de
+ elevadores inteligentes controlados por uma central única. Os usuários fazem chamadas através de um
+ painel externo (que pode ser configurado para um único botão, dois botões ou um painel numérico) e
+ selecionam seu destino por meio do painel interno dos elevadores. A simulação leva em conta:
+ • O tempo de viagem de cada elevador, que varia conforme o andar e o horário (horários de pico e
+ fora de pico).
+ • O tamanho da fila de espera em cada andar.
+ • O tempo de espera de cada usuário.
+ • Prioridades especiais para cadeirantes e pessoas idosas.
+ • A capacidade máxima de cada elevador.
+
+ III. OBJETIVOS
+ • Desenvolver um simulador que modele o funcionamento de elevadores inteligentes em um prédio.
+ • Gerenciar as chamadas e as filas de espera em cada andar utilizando estruturas de dados (filas e
+ listas). Não utilizar estruturas de dados prontas do Java (como ArrayList, StringList, etc). Construa
+ suas próprias classes de listas, filas, pilhas e tudo o mais que for necessário.
+ • Implementar heurísticas de controle que otimizem o tempo de espera ou o consumo de energia,
+ conforme parâmetro de configuração.
+ • Permitir a configuração de diferentes tipos de painéis externos (único botão, dois botões ou painel
+ numérico) e adaptar o painel interno conforme o modelo escolhido.
+
+IV. REQUISITOS FUNCIONAIS
+ 2
+ 1) O prédio deve possuir entre 5 e X andares e de 1 a N elevadores, todos controlados por uma central.
+ 2) Cada andar pode ter uma única fila de espera para todos os elevadores ou filas separadas por elevador.
+ 3) Os painéis externos de chamada poderão ser configurados em três formatos:
+    • Único botão para chamada geral;
+    • Dois botões, indicando intenção de subir ou descer;
+    • Painel numérico para digitar diretamente o andar desejado.
+ 4) O painel interno dos elevadores deverá ser definido de forma a complementar o painel externo
+ escolhido.
+ 5) O sistema deve simular o tempo de viagem de cada elevador, que varia com o andar e com o horário
+ (com parâmetros distintos para horários de pico e fora de pico).
+ 6) O controlador de elevadores deve aplicar uma das três heurísticas de funcionamento:
+    a) Modelo 1: Sem heurística (atendimento na ordem de chegada).
+    b) Modelo 2: Otimização do tempo de espera, ajustando dinamicamente os ciclos dos elevadores
+ conforme a fila de espera.
+    c) Modelo 3: Otimização do consumo de energia, minimizando deslocamentos desnecessários e
+ ajustando os ciclos de operação conforme os horários de pico e de menor movimentação.
+ 7) Prioridades devem ser atribuídas a usuários cadeirantes e idosos, influenciando a ordem de atendi
+mento.
+
+ V. REQUISITOS NÃO FUNCIONAIS
+ • O sistema deve ser modular e permitir a fácil configuração de parâmetros como número de andares,
+ elevadores, tempos de viagem, capacidade dos elevadores, e tipos de painéis.
+ • Deve utilizar de forma eficiente estruturas de dados, como filas e listas, para o gerenciamento dos
+ eventos e das chamadas.
+ • A interface do simulador deverá apresentar logs e, se possível, uma visualização gráfica simples do
+ estado do sistema.
+
+ VI. PARÂMETROS DE CONFIGURAÇÃO
+ • Número de andares: mínimo 5, configurável até X.
+ • Número de elevadores: de 1 a N.
+ • Capacidade dos elevadores (número de pessoas ou peso máximo).
+ • Tipo de painel externo (único botão, dois botões ou painel numérico).
+ • Tempos de viagem dos elevadores: intervalos mínimo e máximo, diferenciados para horários de pico
+ e fora de pico.
+ • Tempo máximo de espera na fila de cada andar.
+ • Heurística de funcionamento a ser aplicada (Modelo 1, Modelo 2 ou Modelo 3).
+ • Parâmetros de consumo de energia por deslocamento e por parada.
+
+ VII. ENTREGÁVEIS
+ 1) Código-fonte completo e bem comentado em Java.
+ 2) Documento técnico detalhando a modelagem do sistema, as estruturas de dados utilizadas e os
+ algoritmos implementados.
+ 3) Apresentação (em formato PPTX, seguindo o padrão widescreen) explicando o funcionamento do
+ simulador, as heurísticas aplicadas e os resultados obtidos.
+ 4) Relatório final contendo análise estatística da simulação (ex.: tempo médio de espera, consumo de
+ energia, número de chamadas atendidas) com gráficos e tabelas.
+ 5) Demonstração prática do simulador por meio de vídeo ou capturas de tela.
+
+VIII. CRITÉRIOS DE AVALIAÇÃO
+ • Correção e completude na implementação dos requisitos funcionais.
+ • Eficiência na utilização das estruturas de dados para gerenciamento de filas e eventos.
+ • Clareza e organização do código-fonte e da documentação técnica.
+ • Criatividade na implementação das heurísticas e na interface de visualização.
+ • Capacidade do sistema em se adaptar a diferentes cenários e configurações.
+
+ IX. CONCLUSÃO
+ Este projeto integra conceitos teóricos e práticos de Estruturas de Dados, simulando o funcionamento
+ de um sistema de elevadores inteligentes. A implementação e análise dos diferentes modelos de controle
+ e heurísticas contribuirão para a otimização do tempo de espera, para o consumo de energia e para a
+ melhoria geral do fluxo de usuários em ambientes de alta densidade, como prédios de grande porte.
