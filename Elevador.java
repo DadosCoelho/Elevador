@@ -1,5 +1,3 @@
-import java.io.Serializable;
-
 public class Elevador extends EntidadeSimulavel {
     private int id;
     private int andarAtual;
@@ -7,7 +5,6 @@ public class Elevador extends EntidadeSimulavel {
     private Fila pessoasNoElevador;
     private boolean subindo;
     private Lista destinos;
-    private int tempoViagemPorAndar;
     private boolean emMovimento;
     private Predio predio;
     private int heuristica;

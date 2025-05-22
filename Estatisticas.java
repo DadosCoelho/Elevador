@@ -4,7 +4,7 @@ import java.util.ArrayList;
 public class Estatisticas implements Serializable {
     private ArrayList<Integer> temposEspera;
     private int chamadasAtendidas;
-    private double energiaConsumida; // Em unidades arbitrárias
+    private double energiaConsumida;
     private int totalPessoasTransportadas;
 
     public Estatisticas() {

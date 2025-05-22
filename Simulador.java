@@ -67,7 +67,11 @@ public class Simulador implements Serializable {
         if (timer != null) {
             timer.cancel();
             emExecucao = false;
+            setVelocidadeSimulacao(1000);
             System.out.println("Simulação pausada.");
+            if (gui != null) {
+                SwingUtilities.invokeLater(() -> gui.resetarVelocidadeSlider());
+            }
         }
     }
 

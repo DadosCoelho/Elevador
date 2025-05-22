@@ -1,8 +1,7 @@
 import java.util.Random;
-import java.util.Scanner;
 
 public class GerenciadorSimulacao {
-    public Lista<Pessoa> gerarListaPessoas(int quantidadePessoas, int quantidadeAndares, Scanner scanner) {
+    public Lista<Pessoa> gerarListaPessoas(int quantidadePessoas, int quantidadeAndares, int percentualPrioridade, int minutoMaxChegada) {
         Random random = new Random();
         Lista<Pessoa> pessoas = new Lista<>();
 
@@ -16,11 +15,11 @@ public class GerenciadorSimulacao {
                 andarDestino = random.nextInt(quantidadeAndares);
             } while (andarDestino == andarOrigem);
 
-            // Gerar prioridade aleatoriamente (50% de chance de ser prioritária)
-            boolean prioritaria = random.nextBoolean();
+            // Gerar prioridade com base no percentual informado
+            boolean prioritaria = random.nextInt(100) < percentualPrioridade;
 
-            // Gerar minuto de chegada aleatoriamente (0 a 60 minutos)
-            int minutoChegada = random.nextInt(61); // 0 a 60 minutos
+            // Gerar minuto de chegada aleatoriamente, considerando o minuto máximo informado
+            int minutoChegada = random.nextInt(minutoMaxChegada + 1);
 
             // Criar pessoa e adicionar à lista
             Pessoa pessoa = new Pessoa(i, andarOrigem, andarDestino, prioritaria, minutoChegada);
