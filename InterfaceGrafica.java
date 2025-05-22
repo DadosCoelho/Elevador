@@ -44,6 +44,7 @@ public class InterfaceGrafica extends JFrame {
     private JButton continueButton;
     public JButton restartButton;
     public JButton backToConfigButton;
+    private JButton saveButton; 
     private JSlider velocidadeSlider;
     private JLabel statusLabel;
     private JLabel velocidadeLabel;
@@ -361,9 +362,9 @@ public class InterfaceGrafica extends JFrame {
             }
         });
 
-        JButton saveButton = criarBotao("Salvar Simulação", new Color(240, 240, 240));
+        saveButton = criarBotao("Salvar Simulação", new Color(240, 240, 240));
         saveButton.setForeground(new Color(60, 130, 200));
-        saveButton.setVisible(true);
+        saveButton.setVisible(false);
         saveButton.addActionListener(e -> salvarSimulacao());
 
         panel.add(continueButton);
@@ -583,6 +584,7 @@ public class InterfaceGrafica extends JFrame {
     public void updateControlButtons(boolean isRunning) {
         pauseButton.setEnabled(isRunning);
         continueButton.setEnabled(!isRunning);
+        saveButton.setVisible(!isRunning);
         statusLabel.setText(isRunning ? "Simulação em andamento" : "Simulação pausada");
     }
 
