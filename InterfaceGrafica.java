@@ -468,6 +468,25 @@ public class InterfaceGrafica extends JFrame {
                 // Exibir o painel de simulação
                 cardLayout.show(mainPanel, "Simulation");
                 predioPanel.repaint();
+
+                // --- ADICIONE AQUI ---
+                // Pausar o simulador e preparar para iniciar
+                simulador.setInterfaceGrafica(this);
+                simulador.pausar();
+                if (adicionarPessoasTimer != null) {
+                    adicionarPessoasTimer.cancel();
+                }
+                agendarAdicaoDePessoas();
+                continueButton.setText("Iniciar");
+                continueButton.setVisible(true);
+                pauseButton.setVisible(false);
+                restartButton.setVisible(false);
+                backToConfigButton.setVisible(false);
+                updateControlButtons(false);
+                velocidadeLabel.setVisible(false);
+                velocidadeSlider.setVisible(false);
+                statusLabel.setText("Simulação pronta para iniciar");
+                // --- FIM DA ADIÇÃO ---
             } catch (IOException | ClassNotFoundException e) {
                 JOptionPane.showMessageDialog(this, "Erro ao carregar simulação: " + e.getMessage(),
                         "Erro", JOptionPane.ERROR_MESSAGE);
